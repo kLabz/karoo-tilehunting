@@ -83,10 +83,12 @@ fun MainScreen(onFinish: () -> Unit) {
     var exploredTilesCount by remember { mutableIntStateOf(0) }
     var squareSize by remember { mutableIntStateOf(0) }
     var recentTilesCount by remember { mutableIntStateOf(0) }
+    var recentNewTilesCount by remember { mutableIntStateOf(0) }
 
     var savedDialogVisible by remember { mutableStateOf(false) }
     var exitDialogVisible by remember { mutableStateOf(false) }
     var clearedRecentExploredTilesDialogVisible by remember { mutableStateOf(false) }
+    var clearedRecentNewTilesDialogVisible by remember { mutableStateOf(false) }
     var tileLoadRange by remember { mutableStateOf("3") }
     var hideGrid by remember { mutableStateOf(false) }
     var isDisabled by remember { mutableStateOf(false) }
@@ -97,6 +99,7 @@ fun MainScreen(onFinish: () -> Unit) {
             downloadedActivities = exploredTilesStore?.downloadedActivities ?: 0
             val exploredTiles = exploredTilesStore?.exploredTilesList?.map { Tile(it.x, it.y) }?.toSet()
             recentTilesCount = exploredTilesStore?.recentlyExploredTilesCount ?: 0
+            recentNewTilesCount = exploredTilesStore?.recentlyExploredNewTilesCount ?: 0
             exploredTilesCount = exploredTiles?.size ?: 0
             squareSize = exploredTilesStore?.biggestSquareSize ?: 0
             hideGrid = settingsStore?.hideGridLines ?: false
@@ -128,12 +131,14 @@ fun MainScreen(onFinish: () -> Unit) {
                     Text("Tiles:")
                     Text("Square:")
                     Text("Recent:")
+                    Text("New:")
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Text("$downloadedActivities")
                     Text("$exploredTilesCount")
                     Text("$squareSize")
                     Text("$recentTilesCount")
+                    Text("$recentNewTilesCount")
                 }
             }
 
@@ -188,6 +193,26 @@ fun MainScreen(onFinish: () -> Unit) {
                     Icon(Icons.Default.Clear, contentDescription = "Reset recent tiles")
                     Spacer(modifier = Modifier.width(5.dp))
                     Text("Reset recent tiles")
+                }
+            }
+
+            if (recentNewTilesCount > 0) {
+                FilledTonalButton(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp), onClick = {
+
+                    coroutineScope.launch {
+                        ctx.exploredTilesDataStore.updateData { exploredTiles ->
+                            exploredTiles.toBuilder()
+                                .clearRecentlyExploredNewTiles()
+                                .build()
+                        }
+                        clearedRecentNewTilesDialogVisible = true
+                    }
+                }) {
+                    Icon(Icons.Default.Clear, contentDescription = "Reset new tiles")
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text("Reset new tiles")
                 }
             }
 
@@ -290,6 +315,15 @@ fun MainScreen(onFinish: () -> Unit) {
                         clearedRecentExploredTilesDialogVisible = false
                     }) { Text("OK") } },
                     text = { Text("Recent tiles cleared.") }
+                )
+            }
+
+            if (clearedRecentNewTilesDialogVisible){
+                AlertDialog(onDismissRequest = { savedDialogVisible = false },
+                    confirmButton = { Button(onClick = {
+                        clearedRecentNewTilesDialogVisible = false
+                    }) { Text("OK") } },
+                    text = { Text("New tiles cleared.") }
                 )
             }
 

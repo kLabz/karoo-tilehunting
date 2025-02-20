@@ -2,7 +2,11 @@
     <string name="app_name">Tilehunting</string>
     <string name="extension_name">Tilehunting</string>
     <string name="explored_tiles">Explored Tiles</string>
-    <string name="explored_tiles_description">Tiles you have epxlored</string>
+    <string name="explored_tiles_description">Tiles you have explored</string>
     <string name="explored_tiles_trip">Recent Tiles</string>
     <string name="explored_tiles_trip_description">Tiles you have explored recently</string>
+    <string name="explored_new_tiles_trip">New Tiles</string>
+    <string name="explored_new_tiles_trip_description">New tiles you have explored recently</string>
+    <string name="square_size">Square</string>
+    <string name="square_size_description">Size of your biggest square</string>
 </resources>

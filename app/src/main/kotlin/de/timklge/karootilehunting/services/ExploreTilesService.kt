@@ -35,10 +35,11 @@ class ExploreTilesService(private val karooSystem: KarooSystemServiceProvider) {
             val exploredTilesFlow = context.exploredTilesDataStore.data
                 .map {
                     val exploredTiles = it.exploredTilesList.map { tile -> Tile(tile.x, tile.y) }.toSet()
-                    val recentlyExploredTiles = it.recentlyExploredTilesList.map { tile -> Tile(tile.x, tile.y) }.toSet()
+                    val recentlyExploredTiles = it.recentlyExploredNewTiles.map { tile -> Tile(tile.x, tile.y) }.toSet()
+                    val recentlyExploredNewTiles = it.recentlyExploredNewTiles.map { tile -> Tile(tile.x, tile.y) }.toSet()
                     val square = if(it.biggestSquareX != 0 && it.biggestSquareY != 0 && it.biggestSquareSize != 0) Square(it.biggestSquareX, it.biggestSquareY, it.biggestSquareSize) else null
 
-                    ExploredTilesData(exploredTiles, recentlyExploredTiles, square)
+                    ExploredTilesData(exploredTiles, recentlyExploredTiles, recentlyExploredNewTiles, square)
                 }
 
             val locationFlow = karooSystem.stream<OnLocationChanged>()
@@ -75,7 +76,7 @@ class ExploreTilesService(private val karooSystem: KarooSystemServiceProvider) {
                 }.filter { (exploredTiles, location) ->
                     val tile = coordsToTile(location.lat, location.lng)
 
-                    !exploredTiles.exploredTiles.contains(tile) && !exploredTiles.recentlyExploredTiles.contains(tile)
+                    !exploredTiles.exploredTiles.contains(tile) && !exploredTiles.recentlyExploredNewTiles.contains(tile)
                 }.collect { (_, location) ->
                     Log.i(TAG, "New tile explored: ${location.lat}, ${location.lng}")
 
@@ -102,12 +103,15 @@ class ExploreTilesService(private val karooSystem: KarooSystemServiceProvider) {
 
                     context.exploredTilesDataStore.updateData { data ->
                         val exploredTiles = data.exploredTilesList.map { Tile(it.x, it.y) }.toSet() + coordsToTile(location.lat, location.lng)
-                        val recentlyExploredTiles = data.recentlyExploredTilesList.map { Tile(it.x, it.y) }.toSet() + coordsToTile(location.lat, location.lng)
+                        val recentlyExploredTiles = data.recentlyExploredTiles.map { Tile(it.x, it.y) }.toSet() + coordsToTile(location.lat, location.lng)
+                        val recentlyExploredNewTiles = data.recentlyExploredNewTiles.map { Tile(it.x, it.y) }.toSet() + coordsToTile(location.lat, location.lng)
                         val updatedSquare = Square.getBiggestSquare(exploredTiles)
 
                         data.toBuilder()
                             .clearRecentlyExploredTiles()
                             .addAllRecentlyExploredTiles(recentlyExploredTiles.map { tile -> de.timklge.karootilehunting.data.Tile.newBuilder().setX(tile.x).setY(tile.y).build() })
+                            .clearRecentlyExploredNewTiles()
+                            .addAllRecentlyExploredNewTiles(recentlyExploredNewTiles.map { tile -> de.timklge.karootilehunting.data.Tile.newBuilder().setX(tile.x).setY(tile.y).build() })
                             .clearExploredTiles()
                             .addAllExploredTiles(exploredTiles.map { tile -> de.timklge.karootilehunting.data.Tile.newBuilder().setX(tile.x).setY(tile.y).build() })
                             .setBiggestSquareX(updatedSquare?.x ?: 0)

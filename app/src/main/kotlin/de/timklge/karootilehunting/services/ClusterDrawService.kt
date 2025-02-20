@@ -68,10 +68,10 @@ class ClusterDrawService(private val karooSystem: KarooSystemServiceProvider,
 
             val exploredTilesFlow = applicationContext.exploredTilesDataStore.data.map {
                 val exploredTiles = it.exploredTilesList.map { tile -> Tile(tile.x, tile.y) }.toSet()
-                val recentlyExploredTiles = it.recentlyExploredTilesList.map { tile -> Tile(tile.x, tile.y) }.toSet()
+                val recentlyExploredNewTiles = it.recentlyExploredNewTilesList.map { tile -> Tile(tile.x, tile.y) }.toSet()
                 val square = if(it.biggestSquareX != 0 && it.biggestSquareY != 0 && it.biggestSquareSize != 0) Square(it.biggestSquareX, it.biggestSquareY, it.biggestSquareSize) else null
 
-                ExploredTilesData(exploredTiles, recentlyExploredTiles, square)
+                ExploredTilesData(exploredTiles, recentlyExploredNewTiles, square)
             }
 
             val settingsFlow = applicationContext.userPreferencesDataStore.data
@@ -153,14 +153,14 @@ class ClusterDrawService(private val karooSystem: KarooSystemServiceProvider,
                             else -> 5.0
                         }
 
-                        val recentlyExploredTiles = exploredTilesData.recentlyExploredTiles
+                        val recentlyExploredNewTiles = exploredTilesData.recentlyExploredNewTiles
                             .filter { it.x in tileLoadRangeX && it.y in tileLoadRangeY }
                             .map { Tile(it.x, it.y) }.toSet()
 
                         val allExploredTilesInRange = exploredTilesData.exploredTiles
                             .filter { it.x in tileLoadRangeX && it.y in tileLoadRangeY }
                             .map { Tile(it.x, it.y) }.toSet()
-                        val exploredTilesInRange = allExploredTilesInRange - recentlyExploredTiles
+                        val exploredTilesInRange = allExploredTilesInRange - recentlyExploredNewTiles
 
                         Log.i(TAG, "Explored tiles: ${exploredTilesInRange.size} - Center Tile: $centerTile - Map Zoom: $mapZoom")
 
@@ -169,20 +169,20 @@ class ClusterDrawService(private val karooSystem: KarooSystemServiceProvider,
 
                         val squareTiles = exploredTilesInRange.intersect((square?.getAllTiles() ?: emptySet()).toSet())
                         val exploredTilesWithNeighbours = (exploredTilesInRange - squareTiles).filter { it.isSurrounded(exploredTilesData.exploredTiles) }.toSet()
-                        val otherExploredTiles = (exploredTilesInRange - squareTiles - recentlyExploredTiles - exploredTilesWithNeighbours).toSet()
-                        val unexploredTiles = viewSquare.getAllTiles() - exploredTilesInRange - recentlyExploredTiles
+                        val otherExploredTiles = (exploredTilesInRange - squareTiles - recentlyExploredNewTiles - exploredTilesWithNeighbours).toSet()
+                        val unexploredTiles = viewSquare.getAllTiles() - exploredTilesInRange - recentlyExploredNewTiles
                         Log.i(TAG, "Unexplored tiles: ${unexploredTiles.size}")
 
                         val squareCluster = clusterTiles(squareTiles).singleOrNull()
                         val clusteredExploredTilesWithNeighbours = clusterTiles(exploredTilesWithNeighbours)
                         val clusteredExploredTiles = clusterTiles(otherExploredTiles)
                         val clusteredUnexploredTiles = clusterTiles(unexploredTiles)
-                        val clusteredRecentlyExploredTiles = clusterTiles(recentlyExploredTiles)
+                        val clusteredRecentlyExploredNewTiles = clusterTiles(recentlyExploredNewTiles)
 
                         val squareClusterGridLines = squareCluster?.getGridPolylines() ?: emptyList()
                         val clusteredExploredGridLines = clusteredExploredTiles.flatMap { it.getGridPolylines() }
                         val clusteredUnexploredGridLines = clusteredUnexploredTiles.flatMap { it.getGridPolylines() }
-                        val clusteredRecentlyExploredGridLines = clusteredRecentlyExploredTiles.flatMap { it.getGridPolylines() }
+                        val clusteredRecentlyExploredGridLines = clusteredRecentlyExploredNewTiles.flatMap { it.getGridPolylines() }
                         val clusteredExploredTilesWithNeighboursGridLines = clusteredExploredTilesWithNeighbours.flatMap { it.getGridPolylines() }
 
                         fun getPolylineCommands(cluster: Cluster?, identifier: String, @ColorRes color: Int, width: Int = 10): List<ShowPolyline> {
@@ -219,7 +219,7 @@ class ClusterDrawService(private val karooSystem: KarooSystemServiceProvider,
                             getPolylineCommands(it, "clustered-unexplored", R.color.gray)
                         }.flatten().toSet()
 
-                        val clusteredRecentlyExploredPolylines = clusteredRecentlyExploredTiles.map {
+                        val clusteredRecentlyExploredPolylines = clusteredRecentlyExploredNewTiles.map {
                             getPolylineCommands(it, "clustered-recent", R.color.lime)
                         }.flatten().toSet()
 

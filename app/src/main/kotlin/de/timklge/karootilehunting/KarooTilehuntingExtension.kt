@@ -3,6 +3,8 @@ package de.timklge.karootilehunting
 import android.util.Log
 import de.timklge.karootilehunting.datatypes.ExploredTilesDataType
 import de.timklge.karootilehunting.datatypes.RecentlyExploredTilesDataType
+import de.timklge.karootilehunting.datatypes.RecentlyExploredNewTilesDataType
+import de.timklge.karootilehunting.datatypes.SquareSizeDataType
 import de.timklge.karootilehunting.services.ClusterDrawService
 import de.timklge.karootilehunting.services.ExploreTilesService
 import de.timklge.karootilehunting.services.KarooSystemServiceProvider
@@ -35,11 +37,13 @@ class KarooTilehuntingExtension : KarooExtension("karoo-tilehunting", "1.0-beta6
     override val types by lazy {
         listOf(
             ExploredTilesDataType(karooSystem.karooSystemService, applicationContext),
-            RecentlyExploredTilesDataType(karooSystem.karooSystemService, applicationContext)
+            RecentlyExploredTilesDataType(karooSystem.karooSystemService, applicationContext),
+            RecentlyExploredNewTilesDataType(karooSystem.karooSystemService, applicationContext),
+            SquareSizeDataType(karooSystem.karooSystemService, applicationContext)
         )
     }
 
-    data class ExploredTilesData(val exploredTiles: Set<Tile>, val recentlyExploredTiles: Set<Tile>, val square: Square?)
+    data class ExploredTilesData(val exploredTiles: Set<Tile>, val recentlyExploredTiles: Set<Tile>, val recentlyExploredNewTiles: Set<Tile>, val square: Square?)
 
     override fun startMap(emitter: Emitter<MapEffect>) {
         Log.d(TAG, "Starting map effect")
