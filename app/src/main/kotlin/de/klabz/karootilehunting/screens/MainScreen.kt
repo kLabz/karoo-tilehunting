@@ -165,7 +165,15 @@ fun MainScreen(onFinish: () -> Unit) {
                     onClick = {
                         coroutineScope.launch {
                             ctx.exploredTilesDataStore.updateData { exploredTiles ->
-                                exploredTiles.toBuilder().setLastDownloadedAt(0).build()
+                                exploredTiles.toBuilder()
+                                .setLastDownloadedAt(0)
+                                .clearExploredTiles()
+                                .clearRecentlyExploredTiles()
+                                .clearRecentlyExploredNewTiles()
+                                .setBiggestSquareX(0)
+                                .setBiggestSquareY(0)
+                                .setBiggestSquareSize(0)
+                                .build()
                             }
                         }
                     }) {
