@@ -19,7 +19,7 @@ class SquareSizeDataType(
     override fun startStream(emitter: Emitter<StreamState>) {
         val job = CoroutineScope(Dispatchers.IO).launch {
             applicationContext.exploredTilesDataStore.data.collect { exploredTiles ->
-                val size = exploredTiles.square.size
+                val size = exploredTiles.biggestSquareSize
                 emitter.onNext(
                     StreamState.Streaming(
                         DataPoint(
