@@ -88,7 +88,6 @@ fun MainScreen(onFinish: () -> Unit) {
     var savedDialogVisible by remember { mutableStateOf(false) }
     var exitDialogVisible by remember { mutableStateOf(false) }
     var clearedRecentExploredTilesDialogVisible by remember { mutableStateOf(false) }
-    var clearedRecentNewTilesDialogVisible by remember { mutableStateOf(false) }
     var tileLoadRange by remember { mutableStateOf("3") }
     var hideGrid by remember { mutableStateOf(false) }
     var isDisabled by remember { mutableStateOf(false) }
@@ -176,7 +175,7 @@ fun MainScreen(onFinish: () -> Unit) {
                 }
             }
 
-            if (recentTilesCount > 0) {
+            if (recentTilesCount > 0 || recentNewTilesCount > 0) {
                 FilledTonalButton(modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp), onClick = {
@@ -185,6 +184,7 @@ fun MainScreen(onFinish: () -> Unit) {
                         ctx.exploredTilesDataStore.updateData { exploredTiles ->
                             exploredTiles.toBuilder()
                                 .clearRecentlyExploredTiles()
+                                .clearRecentlyExploredNewTiles()
                                 .build()
                         }
                         clearedRecentExploredTilesDialogVisible = true
@@ -193,26 +193,6 @@ fun MainScreen(onFinish: () -> Unit) {
                     Icon(Icons.Default.Clear, contentDescription = "Reset recent tiles")
                     Spacer(modifier = Modifier.width(5.dp))
                     Text("Reset recent tiles")
-                }
-            }
-
-            if (recentNewTilesCount > 0) {
-                FilledTonalButton(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp), onClick = {
-
-                    coroutineScope.launch {
-                        ctx.exploredTilesDataStore.updateData { exploredTiles ->
-                            exploredTiles.toBuilder()
-                                .clearRecentlyExploredNewTiles()
-                                .build()
-                        }
-                        clearedRecentNewTilesDialogVisible = true
-                    }
-                }) {
-                    Icon(Icons.Default.Clear, contentDescription = "Reset new tiles")
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text("Reset new tiles")
                 }
             }
 
@@ -315,15 +295,6 @@ fun MainScreen(onFinish: () -> Unit) {
                         clearedRecentExploredTilesDialogVisible = false
                     }) { Text("OK") } },
                     text = { Text("Recent tiles cleared.") }
-                )
-            }
-
-            if (clearedRecentNewTilesDialogVisible){
-                AlertDialog(onDismissRequest = { savedDialogVisible = false },
-                    confirmButton = { Button(onClick = {
-                        clearedRecentNewTilesDialogVisible = false
-                    }) { Text("OK") } },
-                    text = { Text("New tiles cleared.") }
                 )
             }
 
