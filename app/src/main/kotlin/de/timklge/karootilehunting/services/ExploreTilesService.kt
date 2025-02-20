@@ -80,12 +80,19 @@ class ExploreTilesService(private val karooSystem: KarooSystemServiceProvider) {
                 }.collect { (_, location) ->
                     Log.i(TAG, "New tile explored: ${location.lat}, ${location.lng}")
 
+                    val msg = when (exploredTiles.recentlyExploredNewTiles.length) {
+                        0...1 -> "New tile explored",
+                        2 -> "2nd new tile!",
+                        3 -> "3rd new tile!",
+                        else -> "${exploredTiles.recentlyExploredNewTiles.length}th new tile!",
+                    }
+
                     karooSystem.karooSystemService.dispatch(
                         InRideAlert(id = "newtile-${System.currentTimeMillis()}",
                             icon = R.drawable.crosshair,
                             title = "Tilehunting",
-                            detail = "New tile explored",
-                            autoDismissMs = 15_000L,
+                            detail = msg,
+                            autoDismissMs = 5_000L,
                             backgroundColor = R.color.lime,
                             textColor = R.color.black
                         )
