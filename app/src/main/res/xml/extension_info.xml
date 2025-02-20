@@ -4,7 +4,8 @@
     icon="@drawable/crosshair"
     id="karoo-tilehunting-klabz"
     scansDevices="false"
-    mapLayer="true">
+    mapLayer="true"
+    fitFile="true">
 
     <DataType
         description="@string/explored_tiles_description"
