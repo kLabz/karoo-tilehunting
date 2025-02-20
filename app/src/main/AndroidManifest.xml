@@ -9,7 +9,7 @@
         android:icon="@drawable/crosshair"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:name=".KarooTilehuntingAppliation"
+        android:name=".KarooTilehuntingApplication"
         android:theme="@style/Theme.AppCompat">
         <activity
             android:name=".MainActivity"

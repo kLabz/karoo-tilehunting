@@ -20,13 +20,13 @@ val appModule = module {
     singleOf(::ExploreTilesService)
 }
 
-class KarooTilehuntingAppliation : Application() {
+class KarooTilehuntingApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
         startKoin {
             androidLogger()
-            androidContext(this@KarooTilehuntingAppliation)
+            androidContext(this@KarooTilehuntingApplication)
             modules(appModule)
         }
     }

@@ -2,7 +2,7 @@
 <ExtensionInfo
     displayName="@string/extension_name"
     icon="@drawable/crosshair"
-    id="karoo-tilehunting"
+    id="karoo-tilehunting-klabz"
     scansDevices="false"
     mapLayer="true">
 

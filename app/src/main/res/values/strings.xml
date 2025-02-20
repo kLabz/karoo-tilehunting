@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Tilehunting</string>
+    <string name="app_name">kTilehunting</string>
     <string name="extension_name">Tilehunting</string>
     <string name="explored_tiles">Explored Tiles</string>
     <string name="explored_tiles_description">Tiles you have explored</string>
