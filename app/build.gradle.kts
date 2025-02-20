@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    namespace = "de.timklge.karootilehunting"
+    namespace = "de.klabz.karootilehunting"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "de.timklge.karootilehunting"
+        applicationId = "de.klabz.karootilehunting"
         minSdk = 26
         targetSdk = 35
         versionCode = 6

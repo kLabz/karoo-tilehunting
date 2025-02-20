@@ -1,4 +1,4 @@
-package de.timklge.karootilehunting
+package de.klabz.karootilehunting
 
 import org.junit.Test
 

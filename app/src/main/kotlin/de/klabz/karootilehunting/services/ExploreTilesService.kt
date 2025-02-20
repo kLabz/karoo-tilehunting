@@ -1,4 +1,4 @@
-package de.timklge.karootilehunting.services
+package de.klabz.karootilehunting.services
 
 import android.content.Context
 import android.media.MediaPlayer
@@ -7,14 +7,14 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfConversion
-import de.timklge.karootilehunting.CurrentCorner
-import de.timklge.karootilehunting.KarooTilehuntingExtension.Companion.TAG
-import de.timklge.karootilehunting.KarooTilehuntingExtension.ExploredTilesData
-import de.timklge.karootilehunting.R
-import de.timklge.karootilehunting.Square
-import de.timklge.karootilehunting.Tile
-import de.timklge.karootilehunting.coordsToTile
-import de.timklge.karootilehunting.datastores.exploredTilesDataStore
+import de.klabz.karootilehunting.CurrentCorner
+import de.klabz.karootilehunting.KarooTilehuntingExtension.Companion.TAG
+import de.klabz.karootilehunting.KarooTilehuntingExtension.ExploredTilesData
+import de.klabz.karootilehunting.R
+import de.klabz.karootilehunting.Square
+import de.klabz.karootilehunting.Tile
+import de.klabz.karootilehunting.coordsToTile
+import de.klabz.karootilehunting.datastores.exploredTilesDataStore
 import io.hammerhead.karooext.models.InRideAlert
 import io.hammerhead.karooext.models.OnLocationChanged
 import io.hammerhead.karooext.models.PlayBeepPattern
@@ -35,8 +35,8 @@ class ExploreTilesService(private val karooSystem: KarooSystemServiceProvider) {
             val exploredTilesFlow = context.exploredTilesDataStore.data
                 .map {
                     val exploredTiles = it.exploredTilesList.map { tile -> Tile(tile.x, tile.y) }.toSet()
-                    val recentlyExploredTiles = it.recentlyExploredNewTiles.map { tile -> Tile(tile.x, tile.y) }.toSet()
-                    val recentlyExploredNewTiles = it.recentlyExploredNewTiles.map { tile -> Tile(tile.x, tile.y) }.toSet()
+                    val recentlyExploredTiles = it.recentlyExploredTilesList.map { tile -> Tile(tile.x, tile.y) }.toSet()
+                    val recentlyExploredNewTiles = it.recentlyExploredNewTilesList.map { tile -> Tile(tile.x, tile.y) }.toSet()
                     val square = if(it.biggestSquareX != 0 && it.biggestSquareY != 0 && it.biggestSquareSize != 0) Square(it.biggestSquareX, it.biggestSquareY, it.biggestSquareSize) else null
 
                     ExploredTilesData(exploredTiles, recentlyExploredTiles, recentlyExploredNewTiles, square)
@@ -77,14 +77,14 @@ class ExploreTilesService(private val karooSystem: KarooSystemServiceProvider) {
                     val tile = coordsToTile(location.lat, location.lng)
 
                     !exploredTiles.exploredTiles.contains(tile) && !exploredTiles.recentlyExploredNewTiles.contains(tile)
-                }.collect { (_, location) ->
+                }.collect { (exploredTiles, location) ->
                     Log.i(TAG, "New tile explored: ${location.lat}, ${location.lng}")
 
-                    val msg = when (exploredTiles.recentlyExploredNewTiles.length) {
-                        0...1 -> "New tile explored",
-                        2 -> "2nd new tile!",
-                        3 -> "3rd new tile!",
-                        else -> "${exploredTiles.recentlyExploredNewTiles.length}th new tile!",
+                    val msg = when (exploredTiles.recentlyExploredNewTiles.size) {
+                        0, 1 -> "New tile explored"
+                        2 -> "2nd new tile!"
+                        3 -> "3rd new tile!"
+                        else -> "${exploredTiles.recentlyExploredNewTiles.size}th new tile!"
                     }
 
                     karooSystem.karooSystemService.dispatch(
@@ -110,17 +110,17 @@ class ExploreTilesService(private val karooSystem: KarooSystemServiceProvider) {
 
                     context.exploredTilesDataStore.updateData { data ->
                         val exploredTiles = data.exploredTilesList.map { Tile(it.x, it.y) }.toSet() + coordsToTile(location.lat, location.lng)
-                        val recentlyExploredTiles = data.recentlyExploredTiles.map { Tile(it.x, it.y) }.toSet() + coordsToTile(location.lat, location.lng)
-                        val recentlyExploredNewTiles = data.recentlyExploredNewTiles.map { Tile(it.x, it.y) }.toSet() + coordsToTile(location.lat, location.lng)
+                        val recentlyExploredTiles = data.recentlyExploredTilesList.map { Tile(it.x, it.y) }.toSet() + coordsToTile(location.lat, location.lng)
+                        val recentlyExploredNewTiles = data.recentlyExploredNewTilesList.map { Tile(it.x, it.y) }.toSet() + coordsToTile(location.lat, location.lng)
                         val updatedSquare = Square.getBiggestSquare(exploredTiles)
 
                         data.toBuilder()
                             .clearRecentlyExploredTiles()
-                            .addAllRecentlyExploredTiles(recentlyExploredTiles.map { tile -> de.timklge.karootilehunting.data.Tile.newBuilder().setX(tile.x).setY(tile.y).build() })
+                            .addAllRecentlyExploredTiles(recentlyExploredTiles.map { tile -> de.klabz.karootilehunting.data.Tile.newBuilder().setX(tile.x).setY(tile.y).build() })
                             .clearRecentlyExploredNewTiles()
-                            .addAllRecentlyExploredNewTiles(recentlyExploredNewTiles.map { tile -> de.timklge.karootilehunting.data.Tile.newBuilder().setX(tile.x).setY(tile.y).build() })
+                            .addAllRecentlyExploredNewTiles(recentlyExploredNewTiles.map { tile -> de.klabz.karootilehunting.data.Tile.newBuilder().setX(tile.x).setY(tile.y).build() })
                             .clearExploredTiles()
-                            .addAllExploredTiles(exploredTiles.map { tile -> de.timklge.karootilehunting.data.Tile.newBuilder().setX(tile.x).setY(tile.y).build() })
+                            .addAllExploredTiles(exploredTiles.map { tile -> de.klabz.karootilehunting.data.Tile.newBuilder().setX(tile.x).setY(tile.y).build() })
                             .setBiggestSquareX(updatedSquare?.x ?: 0)
                             .setBiggestSquareY(updatedSquare?.y ?: 0)
                             .setBiggestSquareSize(updatedSquare?.size ?: 0)

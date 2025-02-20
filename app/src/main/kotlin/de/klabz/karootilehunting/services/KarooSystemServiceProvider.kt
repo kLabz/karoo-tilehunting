@@ -1,8 +1,8 @@
-package de.timklge.karootilehunting.services
+package de.klabz.karootilehunting.services
 
 import android.content.Context
 import android.util.Log
-import de.timklge.karootilehunting.KarooTilehuntingExtension.Companion.TAG
+import de.klabz.karootilehunting.KarooTilehuntingExtension.Companion.TAG
 import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.models.KarooEvent
 import io.hammerhead.karooext.models.OnStreamState

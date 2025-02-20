@@ -1,4 +1,4 @@
-package de.timklge.karootilehunting.screens
+package de.klabz.karootilehunting.screens
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.DropdownMenuItem

@@ -1,4 +1,4 @@
-package de.timklge.karootilehunting
+package de.klabz.karootilehunting
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

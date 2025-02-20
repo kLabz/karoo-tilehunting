@@ -1,7 +1,7 @@
-package de.timklge.karootilehunting.services
+package de.klabz.karootilehunting.services
 
 import android.util.Log
-import de.timklge.karootilehunting.KarooTilehuntingExtension
+import de.klabz.karootilehunting.KarooTilehuntingExtension
 import io.hammerhead.karooext.models.HttpResponseState
 import io.hammerhead.karooext.models.OnHttpResponse
 import io.ktor.client.HttpClient

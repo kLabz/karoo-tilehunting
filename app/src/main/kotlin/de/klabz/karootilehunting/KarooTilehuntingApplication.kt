@@ -1,11 +1,11 @@
-package de.timklge.karootilehunting
+package de.klabz.karootilehunting
 
 import android.app.Application
-import de.timklge.karootilehunting.services.ClusterDrawService
-import de.timklge.karootilehunting.services.ExploreTilesService
-import de.timklge.karootilehunting.services.KarooSystemServiceProvider
-import de.timklge.karootilehunting.services.StatshuntersTilesProvider
-import de.timklge.karootilehunting.services.TileDownloadService
+import de.klabz.karootilehunting.services.ClusterDrawService
+import de.klabz.karootilehunting.services.ExploreTilesService
+import de.klabz.karootilehunting.services.KarooSystemServiceProvider
+import de.klabz.karootilehunting.services.StatshuntersTilesProvider
+import de.klabz.karootilehunting.services.TileDownloadService
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin

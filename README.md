@@ -1,15 +1,15 @@
 # Karoo Tilehunting Extension 
 
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/timklge/karoo-tilehunting/android.yml)](https://github.com/timklge/karoo-tilehunting/actions/workflows/android.yml)
-[![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/timklge/karoo-tilehunting/app-release.apk)](https://github.com/timklge/karoo-tilehunting/releases)
-[![GitHub License](https://img.shields.io/github/license/timklge/karoo-tilehunting)](https://github.com/timklge/karoo-tilehunting/blob/master/LICENSE)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/klabz/karoo-tilehunting/android.yml)](https://github.com/klabz/karoo-tilehunting/actions/workflows/android.yml)
+[![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/klabz/karoo-tilehunting/app-release.apk)](https://github.com/klabz/karoo-tilehunting/releases)
+[![GitHub License](https://img.shields.io/github/license/klabz/karoo-tilehunting)](https://github.com/klabz/karoo-tilehunting/blob/master/LICENSE)
 
 This extension for Karoo devices adds a map overlay that shows explored tiles and an alert if you ride into an unexplored one. Optionally, past activities are also displayed on the map. Tiles and activities are fetched from [statshunters.com](https://www.statshunters.com).
 You can read more about tilehunting in the [StatsHunters FAQ](https://www.statshunters.com/faq-10-what-are-explorer-tiles) or watch the [nice introduction video](https://www.youtube.com/watch?v=e63UKfvPw9g) for an overview on StatsHunters' features.
 
 Compatible with Karoo 2 and Karoo 3 devices.
 
-<a href="https://www.buymeacoffee.com/timklge" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+<a href="https://www.buymeacoffee.com/klabz" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
 ![Menu](menu.png)
 ![Tiles](tiles.png)
@@ -19,13 +19,13 @@ Compatible with Karoo 2 and Karoo 3 devices.
 
 If you are using a Karoo 3, you can use [Hammerhead's sideloading procedure](https://support.hammerhead.io/hc/en-us/articles/31576497036827-Companion-App-Sideloading) to install the app:
 
-1. Using the browser on your phone, long-press [this download link](https://github.com/timklge/karoo-tilehunting/releases/latest/download/app-release.apk) and share it with the Hammerhead Companion app.
+1. Using the browser on your phone, long-press [this download link](https://github.com/klabz/karoo-tilehunting/releases/latest/download/app-release.apk) and share it with the Hammerhead Companion app.
 2. Your karoo should show an info screen about the app now. Press "Install".
 3. Open the app from the main menu and link your StatsHunters account (see "Usage" below)
 
 If you are using a Karoo 2, you can use manual sideloading:
 
-1. Download the apk from the [releases page](https://github.com/timklge/karoo-tilehunting/releases) (or build it from source)
+1. Download the apk from the [releases page](https://github.com/klabz/karoo-tilehunting/releases) (or build it from source)
 2. Set up your Karoo for sideloading. DC Rainmaker has a great [step-by-step guide](https://www.dcrainmaker.com/2021/02/how-to-sideload-android-apps-on-your-hammerhead-karoo-1-karoo-2.html).
 3. Install the app by running `adb install app-release.apk`.
 4. Open the app from the main menu and link your StatsHunters account (see "Usage" below)

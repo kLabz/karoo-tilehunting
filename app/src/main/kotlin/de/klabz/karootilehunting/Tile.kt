@@ -1,4 +1,4 @@
-package de.timklge.karootilehunting
+package de.klabz.karootilehunting
 
 import kotlin.math.cos
 import kotlin.math.ln

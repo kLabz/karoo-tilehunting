@@ -1,6 +1,6 @@
-package de.timklge.karootilehunting.services
+package de.klabz.karootilehunting.services
 
-import de.timklge.karootilehunting.Tile
+import de.klabz.karootilehunting.Tile
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

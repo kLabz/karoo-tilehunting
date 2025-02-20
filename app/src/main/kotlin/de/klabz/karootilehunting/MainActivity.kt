@@ -1,10 +1,10 @@
-package de.timklge.karootilehunting
+package de.klabz.karootilehunting
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import de.timklge.karootilehunting.screens.MainScreen
-import de.timklge.karootilehunting.theme.AppTheme
+import de.klabz.karootilehunting.screens.MainScreen
+import de.klabz.karootilehunting.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

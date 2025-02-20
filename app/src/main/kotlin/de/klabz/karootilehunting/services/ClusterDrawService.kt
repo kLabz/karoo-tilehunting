@@ -1,26 +1,26 @@
-package de.timklge.karootilehunting.services
+package de.klabz.karootilehunting.services
 
 import android.content.Context
 import android.util.Log
 import androidx.annotation.ColorRes
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
-import de.timklge.karootilehunting.Cluster
-import de.timklge.karootilehunting.KarooTilehuntingExtension.Companion.TAG
-import de.timklge.karootilehunting.KarooTilehuntingExtension.ExploredTilesData
-import de.timklge.karootilehunting.R
-import de.timklge.karootilehunting.Square
-import de.timklge.karootilehunting.Tile
-import de.timklge.karootilehunting.clusterTiles
-import de.timklge.karootilehunting.coordsToTile
-import de.timklge.karootilehunting.data.GpsCoords
-import de.timklge.karootilehunting.data.PastActivities
-import de.timklge.karootilehunting.data.UserPreferences
-import de.timklge.karootilehunting.datastores.activityLinesDataStore
-import de.timklge.karootilehunting.datastores.exploredTilesDataStore
-import de.timklge.karootilehunting.datastores.userPreferencesDataStore
-import de.timklge.karootilehunting.lastKnownGpsCoordsDataStore
-import de.timklge.karootilehunting.throttle
+import de.klabz.karootilehunting.Cluster
+import de.klabz.karootilehunting.KarooTilehuntingExtension.Companion.TAG
+import de.klabz.karootilehunting.KarooTilehuntingExtension.ExploredTilesData
+import de.klabz.karootilehunting.R
+import de.klabz.karootilehunting.Square
+import de.klabz.karootilehunting.Tile
+import de.klabz.karootilehunting.clusterTiles
+import de.klabz.karootilehunting.coordsToTile
+import de.klabz.karootilehunting.data.GpsCoords
+import de.klabz.karootilehunting.data.PastActivities
+import de.klabz.karootilehunting.data.UserPreferences
+import de.klabz.karootilehunting.datastores.activityLinesDataStore
+import de.klabz.karootilehunting.datastores.exploredTilesDataStore
+import de.klabz.karootilehunting.datastores.userPreferencesDataStore
+import de.klabz.karootilehunting.lastKnownGpsCoordsDataStore
+import de.klabz.karootilehunting.throttle
 import io.hammerhead.karooext.internal.Emitter
 import io.hammerhead.karooext.models.HidePolyline
 import io.hammerhead.karooext.models.MapEffect
@@ -68,10 +68,11 @@ class ClusterDrawService(private val karooSystem: KarooSystemServiceProvider,
 
             val exploredTilesFlow = applicationContext.exploredTilesDataStore.data.map {
                 val exploredTiles = it.exploredTilesList.map { tile -> Tile(tile.x, tile.y) }.toSet()
+                val recentlyExploredTiles = it.recentlyExploredTilesList.map { tile -> Tile(tile.x, tile.y) }.toSet()
                 val recentlyExploredNewTiles = it.recentlyExploredNewTilesList.map { tile -> Tile(tile.x, tile.y) }.toSet()
                 val square = if(it.biggestSquareX != 0 && it.biggestSquareY != 0 && it.biggestSquareSize != 0) Square(it.biggestSquareX, it.biggestSquareY, it.biggestSquareSize) else null
 
-                ExploredTilesData(exploredTiles, recentlyExploredNewTiles, square)
+                ExploredTilesData(exploredTiles, recentlyExploredTiles, recentlyExploredNewTiles, square)
             }
 
             val settingsFlow = applicationContext.userPreferencesDataStore.data

@@ -1,4 +1,4 @@
-package de.timklge.karootilehunting.screens
+package de.klabz.karootilehunting.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -50,9 +50,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import de.timklge.karootilehunting.Tile
-import de.timklge.karootilehunting.datastores.exploredTilesDataStore
-import de.timklge.karootilehunting.datastores.userPreferencesDataStore
+import de.klabz.karootilehunting.Tile
+import de.klabz.karootilehunting.datastores.exploredTilesDataStore
+import de.klabz.karootilehunting.datastores.userPreferencesDataStore
 import io.hammerhead.karooext.KarooSystemService
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

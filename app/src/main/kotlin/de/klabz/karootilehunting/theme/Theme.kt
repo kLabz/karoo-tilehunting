@@ -1,11 +1,11 @@
-package de.timklge.karootilehunting.theme
+package de.klabz.karootilehunting.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.glance.LocalContext
-import de.timklge.karootilehunting.R
+import de.klabz.karootilehunting.R
 
 @Composable
 fun AppTheme(

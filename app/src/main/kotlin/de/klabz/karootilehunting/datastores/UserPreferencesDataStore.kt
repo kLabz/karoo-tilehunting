@@ -1,4 +1,4 @@
-package de.timklge.karootilehunting.datastores
+package de.klabz.karootilehunting.datastores
 
 import android.content.Context
 import android.util.Log
@@ -6,8 +6,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
 import com.google.protobuf.InvalidProtocolBufferException
-import de.timklge.karootilehunting.KarooTilehuntingExtension
-import de.timklge.karootilehunting.data.UserPreferences
+import de.klabz.karootilehunting.KarooTilehuntingExtension
+import de.klabz.karootilehunting.data.UserPreferences
 import java.io.InputStream
 import java.io.OutputStream
 

@@ -1,7 +1,7 @@
-package de.timklge.karootilehunting.datatypes
+package de.klabz.karootilehunting.datatypes
 
 import android.content.Context
-import de.timklge.karootilehunting.datastores.exploredTilesDataStore
+import de.klabz.karootilehunting.datastores.exploredTilesDataStore
 import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.internal.Emitter
@@ -12,22 +12,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class RecentlyExploredTilesDataType(
+class ExploredTilesDataType(
     private val karooSystem: KarooSystemService,
     private val applicationContext: Context
-) : DataTypeImpl("karoo-tilehunting", "explored_tiles_trip") {
+) : DataTypeImpl("karoo-tilehunting", "explored_tiles") {
     override fun startStream(emitter: Emitter<StreamState>) {
         val job = CoroutineScope(Dispatchers.IO).launch {
             applicationContext.exploredTilesDataStore.data.collect { exploredTiles ->
-                val count = exploredTiles.recentlyExploredTilesCount
-                emitter.onNext(
-                    StreamState.Streaming(
-                        DataPoint(
-                            dataTypeId,
-                            mapOf(DataType.Field.SINGLE to count.toDouble())
-                        )
-                    )
-                )
+                val count = exploredTiles.exploredTilesCount
+                emitter.onNext(StreamState.Streaming(DataPoint(dataTypeId, mapOf(DataType.Field.SINGLE to count.toDouble()))))
             }
         }
         emitter.setCancellable {
@@ -35,3 +28,4 @@ class RecentlyExploredTilesDataType(
         }
     }
 }
+

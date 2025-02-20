@@ -1,14 +1,14 @@
-package de.timklge.karootilehunting
+package de.klabz.karootilehunting
 
 import android.util.Log
-import de.timklge.karootilehunting.datatypes.ExploredTilesDataType
-import de.timklge.karootilehunting.datatypes.RecentlyExploredTilesDataType
-import de.timklge.karootilehunting.datatypes.RecentlyExploredNewTilesDataType
-import de.timklge.karootilehunting.datatypes.SquareSizeDataType
-import de.timklge.karootilehunting.services.ClusterDrawService
-import de.timklge.karootilehunting.services.ExploreTilesService
-import de.timklge.karootilehunting.services.KarooSystemServiceProvider
-import de.timklge.karootilehunting.services.TileDownloadService
+import de.klabz.karootilehunting.datatypes.ExploredTilesDataType
+import de.klabz.karootilehunting.datatypes.RecentlyExploredTilesDataType
+import de.klabz.karootilehunting.datatypes.RecentlyExploredNewTilesDataType
+import de.klabz.karootilehunting.datatypes.SquareSizeDataType
+import de.klabz.karootilehunting.services.ClusterDrawService
+import de.klabz.karootilehunting.services.ExploreTilesService
+import de.klabz.karootilehunting.services.KarooSystemServiceProvider
+import de.klabz.karootilehunting.services.TileDownloadService
 import io.hammerhead.karooext.extension.KarooExtension
 import io.hammerhead.karooext.internal.Emitter
 import io.hammerhead.karooext.models.MapEffect

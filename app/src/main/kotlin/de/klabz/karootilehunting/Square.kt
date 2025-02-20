@@ -1,4 +1,4 @@
-package de.timklge.karootilehunting
+package de.klabz.karootilehunting
 
 data class Square(val x: Int, val y: Int, val size: Int){
     fun isInside(tile: Tile): Boolean {

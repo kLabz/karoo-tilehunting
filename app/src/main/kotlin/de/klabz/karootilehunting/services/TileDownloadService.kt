@@ -1,4 +1,4 @@
-package de.timklge.karootilehunting.services
+package de.klabz.karootilehunting.services
 
 import android.content.Context
 import android.util.Log
@@ -8,13 +8,13 @@ import com.mapbox.turf.TurfConversion
 import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
 import com.mapbox.turf.TurfTransformation
-import de.timklge.karootilehunting.KarooTilehuntingExtension.Companion.TAG
-import de.timklge.karootilehunting.Square
-import de.timklge.karootilehunting.Tile
-import de.timklge.karootilehunting.data.Activity
-import de.timklge.karootilehunting.datastores.activityLinesDataStore
-import de.timklge.karootilehunting.datastores.exploredTilesDataStore
-import de.timklge.karootilehunting.datastores.userPreferencesDataStore
+import de.klabz.karootilehunting.KarooTilehuntingExtension.Companion.TAG
+import de.klabz.karootilehunting.Square
+import de.klabz.karootilehunting.Tile
+import de.klabz.karootilehunting.data.Activity
+import de.klabz.karootilehunting.datastores.activityLinesDataStore
+import de.klabz.karootilehunting.datastores.exploredTilesDataStore
+import de.klabz.karootilehunting.datastores.userPreferencesDataStore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -74,7 +74,7 @@ class TileDownloadService(private val applicationContext: Context, val statshunt
                                 activityCount += activities.size
                                 val updatedExploredTiles = alreadyExploredTiles + newTiles
                                 val updatedExploredTilesProto = updatedExploredTiles.map {
-                                    de.timklge.karootilehunting.data.Tile.newBuilder().setX(it.x).setY(it.y).build()
+                                    de.klabz.karootilehunting.data.Tile.newBuilder().setX(it.x).setY(it.y).build()
                                 }
                                 Log.d(TAG, "New explored tile count: ${updatedExploredTiles.size}, $activityCount activities")
                                 val updatedSquare = Square.getBiggestSquare(updatedExploredTiles)
@@ -97,7 +97,7 @@ class TileDownloadService(private val applicationContext: Context, val statshunt
                                     val activity = activities[index]
 
                                     Activity.newBuilder()
-                                        .addAllTiles(activity.tiles.map { tile -> de.timklge.karootilehunting.data.Tile.newBuilder().setX(tile.x).setY(tile.y).build() })
+                                        .addAllTiles(activity.tiles.map { tile -> de.klabz.karootilehunting.data.Tile.newBuilder().setX(tile.x).setY(tile.y).build() })
                                         .setId(activity.id)
                                         .setDate(activity.date)
                                         .setName(activity.name)
