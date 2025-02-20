@@ -114,6 +114,19 @@ class ExploreTilesService(private val karooSystem: KarooSystemServiceProvider) {
                         val recentlyExploredNewTiles = data.recentlyExploredNewTilesList.map { Tile(it.x, it.y) }.toSet() + coordsToTile(location.lat, location.lng)
                         val updatedSquare = Square.getBiggestSquare(exploredTiles)
 
+                        if (updatedSquare != null && updatedSquare!!.size > data.biggestSquareSize) {
+                            karooSystem.karooSystemService.dispatch(
+                                InRideAlert(id = "incrsquare-${System.currentTimeMillis()}",
+                                    icon = R.drawable.crosshair,
+                                    title = "Tilehunting",
+                                    detail = "New square size: ${updatedSquare!!.size}!",
+                                    autoDismissMs = 15_000L,
+                                    backgroundColor = R.color.lime,
+                                    textColor = R.color.black
+                                )
+                            )
+                        }
+
                         data.toBuilder()
                             .clearRecentlyExploredTiles()
                             .addAllRecentlyExploredTiles(recentlyExploredTiles.map { tile -> de.klabz.karootilehunting.data.Tile.newBuilder().setX(tile.x).setY(tile.y).build() })
