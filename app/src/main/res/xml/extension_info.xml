@@ -10,28 +10,27 @@
         description="@string/explored_tiles_description"
         displayName="@string/explored_tiles"
         graphical="false"
-        icon="@drawable/crosshair"
+        icon="@drawable/been_here"
         typeId="explored_tiles" />
 
     <DataType
         description="@string/explored_new_tiles_trip_description"
         displayName="@string/explored_new_tiles_trip"
         graphical="false"
-        icon="@drawable/crosshair"
+        icon="@drawable/location_plus"
         typeId="explored_new_tiles_trip" />
 
     <DataType
         description="@string/explored_tiles_trip_description"
         displayName="@string/explored_tiles_trip"
         graphical="false"
-        icon="@drawable/crosshair"
+        icon="@drawable/trip"
         typeId="explored_tiles_trip" />
 
-    <!-- TODO: square icon -->
     <DataType
         description="@string/square_size_description"
         displayName="@string/square_size"
         graphical="false"
-        icon="@drawable/crosshair"
+        icon="@drawable/area"
         typeId="square_size" />
 </ExtensionInfo>
