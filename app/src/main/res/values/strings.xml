@@ -9,4 +9,6 @@
     <string name="explored_new_tiles_trip_description">New tiles you have explored recently</string>
     <string name="square_size">Square</string>
     <string name="square_size_description">Size of your biggest square</string>
+    <string name="dual_trip">Dual recent</string>
+    <string name="dual_trip_description">Dual field with both recently explored and new tiles</string>
 </resources>

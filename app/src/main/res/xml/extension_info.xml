@@ -8,6 +8,13 @@
     fitFile="true">
 
     <DataType
+        description="@string/dual_trip_description"
+        displayName="@string/dual_trip"
+        graphical="true"
+        icon="@drawable/trip"
+        typeId="dual_trip" />
+
+    <DataType
         description="@string/explored_tiles_description"
         displayName="@string/explored_tiles"
         graphical="false"
