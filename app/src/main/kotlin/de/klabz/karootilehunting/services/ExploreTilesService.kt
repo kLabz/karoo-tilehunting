@@ -76,42 +76,53 @@ class ExploreTilesService(private val karooSystem: KarooSystemServiceProvider) {
                 }.filter { (exploredTiles, location) ->
                     val tile = coordsToTile(location.lat, location.lng)
 
+                    // New tile
                     !exploredTiles.exploredTiles.contains(tile) && !exploredTiles.recentlyExploredNewTiles.contains(tile)
+                    // New recent tile
+                    || !exploredTiles.recentlyExploredTiles.contains(tile)
                 }.collect { (exploredTiles, location) ->
-                    Log.i(TAG, "New tile explored: ${location.lat}, ${location.lng}")
+                    val currentTile = coordsToTile(location.lat, location.lng)
+                    val isNew = !exploredTiles.exploredTiles.contains(currentTile) && !exploredTiles.recentlyExploredNewTiles.contains(currentTile)
 
-                    val msg = when (exploredTiles.recentlyExploredNewTiles.size) {
-                        0, 1 -> "New tile explored"
-                        2 -> "2nd new tile!"
-                        3 -> "3rd new tile!"
-                        else -> "${exploredTiles.recentlyExploredNewTiles.size}th new tile!"
+                    if (isNew) Log.i(TAG, "New tile explored: ${location.lat}, ${location.lng}")
+                    else Log.i(TAG, "Tile explored: ${location.lat}, ${location.lng}")
+
+                    if (isNew) {
+                        val msg = when (exploredTiles.recentlyExploredNewTiles.size) {
+                            0, 1 -> "New tile explored"
+                            2 -> "2nd new tile!"
+                            3 -> "3rd new tile!"
+                            else -> "${exploredTiles.recentlyExploredNewTiles.size}th new tile!"
+                        }
+
+                        karooSystem.karooSystemService.dispatch(
+                            InRideAlert(id = "newtile-${System.currentTimeMillis()}",
+                                icon = R.drawable.crosshair,
+                                title = "Tilehunting",
+                                detail = msg,
+                                autoDismissMs = 5_000L,
+                                backgroundColor = R.color.lime,
+                                textColor = R.color.black
+                            )
+                        )
+
+                        karooSystem.karooSystemService.dispatch(
+                            PlayBeepPattern(listOf(
+                                PlayBeepPattern.Tone(4_000, 500),
+                                PlayBeepPattern.Tone(4_500, 500),
+                                PlayBeepPattern.Tone(4_000, 500)
+                            ))
+                        )
+
+                        mediaPlayer?.start()
                     }
 
-                    karooSystem.karooSystemService.dispatch(
-                        InRideAlert(id = "newtile-${System.currentTimeMillis()}",
-                            icon = R.drawable.crosshair,
-                            title = "Tilehunting",
-                            detail = msg,
-                            autoDismissMs = 5_000L,
-                            backgroundColor = R.color.lime,
-                            textColor = R.color.black
-                        )
-                    )
-
-                    karooSystem.karooSystemService.dispatch(
-                        PlayBeepPattern(listOf(
-                            PlayBeepPattern.Tone(4_000, 500),
-                            PlayBeepPattern.Tone(4_500, 500),
-                            PlayBeepPattern.Tone(4_000, 500)
-                        ))
-                    )
-
-                    mediaPlayer?.start()
-
                     context.exploredTilesDataStore.updateData { data ->
-                        val exploredTiles = data.exploredTilesList.map { Tile(it.x, it.y) }.toSet() + coordsToTile(location.lat, location.lng)
-                        val recentlyExploredTiles = data.recentlyExploredTilesList.map { Tile(it.x, it.y) }.toSet() + coordsToTile(location.lat, location.lng)
-                        val recentlyExploredNewTiles = data.recentlyExploredNewTilesList.map { Tile(it.x, it.y) }.toSet() + coordsToTile(location.lat, location.lng)
+                        val exploredTilesSet = data.exploredTilesList.map { Tile(it.x, it.y) }.toSet()
+                        val exploredTiles = if (isNew) exploredTilesSet + currentTile else exploredTilesSet
+                        val recentlyExploredTiles = data.recentlyExploredTilesList.map { Tile(it.x, it.y) }.toSet() + currentTile
+                        val recentlyExploredNewTilesSet = data.recentlyExploredNewTilesList.map { Tile(it.x, it.y) }.toSet()
+                        val recentlyExploredNewTiles = if (isNew) recentlyExploredNewTilesSet + currentTile else recentlyExploredNewTilesSet
                         val updatedSquare = Square.getBiggestSquare(exploredTiles)
 
                         if (updatedSquare != null && updatedSquare!!.size > data.biggestSquareSize) {
