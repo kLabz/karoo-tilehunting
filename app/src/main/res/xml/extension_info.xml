@@ -15,6 +15,13 @@
         typeId="dual_trip" />
 
     <DataType
+        description="@string/dual_alltime_description"
+        displayName="@string/dual_alltime"
+        graphical="true"
+        icon="@drawable/been_here"
+        typeId="dual_alltime" />
+
+    <DataType
         description="@string/explored_tiles_description"
         displayName="@string/explored_tiles"
         graphical="false"
