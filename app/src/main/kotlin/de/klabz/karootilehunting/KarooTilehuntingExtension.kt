@@ -50,8 +50,8 @@ class KarooTilehuntingExtension : KarooExtension("karoo-tilehunting", "1.0-beta6
 
     override val types by lazy {
         listOf(
-            DualAllTimeDataType(karooSystem.karooSystemService, applicationContext),
-            DualRecentDataType(karooSystem.karooSystemService, applicationContext),
+            DualAllTimeDataType(applicationContext),
+            DualRecentDataType(applicationContext),
             ExploredTilesDataType(karooSystem.karooSystemService, applicationContext),
             RecentlyExploredTilesDataType(karooSystem.karooSystemService, applicationContext),
             RecentlyExploredNewTilesDataType(karooSystem.karooSystemService, applicationContext),
