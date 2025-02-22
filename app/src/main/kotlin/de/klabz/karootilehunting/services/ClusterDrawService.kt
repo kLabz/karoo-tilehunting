@@ -207,7 +207,7 @@ class ClusterDrawService(private val karooSystem: KarooSystemServiceProvider,
                             ShowPolyline(
                                 id = "activity-${id}-${viewSquare.size}",
                                 encodedPolyline = str,
-                                color = applicationContext.getColor(R.color.fadedGray),
+                                color = applicationContext.getColor(R.color.gray),
                                 width = 4
                             )
                         }
