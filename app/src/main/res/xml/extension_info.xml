@@ -2,7 +2,7 @@
 <ExtensionInfo
     displayName="@string/extension_name"
     icon="@drawable/crosshair"
-    id="karoo-tilehunting-klabz"
+    id="squadrating"
     scansDevices="false"
     mapLayer="true"
     fitFile="true">
@@ -22,30 +22,30 @@
         typeId="dual_alltime" />
 
     <DataType
-        description="@string/explored_tiles_description"
-        displayName="@string/explored_tiles"
+        description="@string/explored_squadrats_description"
+        displayName="@string/explored_squadrats"
         graphical="false"
         icon="@drawable/been_here"
-        typeId="explored_tiles" />
+        typeId="explored_squadrats" />
 
     <DataType
-        description="@string/explored_new_tiles_trip_description"
-        displayName="@string/explored_new_tiles_trip"
+        description="@string/explored_new_squadrats_trip_description"
+        displayName="@string/explored_new_squadrats_trip"
         graphical="false"
         icon="@drawable/location_plus"
-        typeId="explored_new_tiles_trip" />
+        typeId="explored_new_squadrats_trip" />
 
     <DataType
-        description="@string/explored_tiles_trip_description"
-        displayName="@string/explored_tiles_trip"
+        description="@string/explored_squadrats_trip_description"
+        displayName="@string/explored_squadrats_trip"
         graphical="false"
         icon="@drawable/trip"
-        typeId="explored_tiles_trip" />
+        typeId="explored_squadrats_trip" />
 
     <DataType
-        description="@string/square_size_description"
-        displayName="@string/square_size"
+        description="@string/ubersquadrat_size_description"
+        displayName="@string/ubersquadrat_size"
         graphical="false"
         icon="@drawable/area"
-        typeId="square_size" />
+        typeId="ubersquadrat_size" />
 </ExtensionInfo>

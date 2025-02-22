@@ -42,5 +42,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Karoo Tilehunting"
+rootProject.name = "Squadrating"
 include("app")

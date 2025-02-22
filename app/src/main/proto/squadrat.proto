@@ -1,0 +1,23 @@
+syntax = "proto3";
+option java_package = "bzh.klabz.squadrating.data";
+option java_multiple_files = true;
+
+message Squadrat {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+message ExploredSquadrats {
+  repeated Squadrat exploredSquadrats = 1;
+  repeated Squadrat recentlyExploredSquadrats = 2;
+  repeated Squadrat recentlyExploredNewSquadrats = 3;
+
+  uint64 lastDownloadedAt = 4;
+  bool isDownloading = 5;
+  uint32 downloadedActivities = 6;
+  string lastDownloadError = 7;
+
+  uint32 biggestUbersquadratX = 8;
+  uint32 biggestUbersquadratY = 9;
+  uint32 biggestUbersquadratSize = 10;
+}

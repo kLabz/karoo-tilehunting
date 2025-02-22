@@ -1,10 +1,10 @@
 syntax = "proto3";
-option java_package = "de.klabz.karootilehunting.data";
+option java_package = "bzh.klabz.squadrating.data";
 option java_multiple_files = true;
 
 message UserPreferences {
   string statshuntersSharecode = 2;
-  uint32 tileDrawRange = 3;
+  uint32 squadratDrawRange = 3;
   bool hideGridLines = 4;
   bool isDisabled = 5;
   bool showActivityLines = 6;

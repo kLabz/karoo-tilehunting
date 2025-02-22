@@ -1,8 +1,8 @@
 syntax = "proto3";
-option java_package = "de.klabz.karootilehunting.data";
+option java_package = "bzh.klabz.squadrating.data";
 option java_multiple_files = true;
 
-import "tile.proto";
+import "squadrat.proto";
 
 message Activity {
   int32 id = 1;
@@ -35,7 +35,7 @@ message Activity {
   string utc_date = 28;
   repeated Country countries = 29;
   repeated Region regions = 30;
-  repeated Tile tiles = 31;
+  repeated Squadrat tiles = 31;
   string encoded_polyline = 35;
 }
 

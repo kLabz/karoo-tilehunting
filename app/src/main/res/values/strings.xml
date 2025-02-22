@@ -1,16 +1,16 @@
 <resources>
-    <string name="app_name">kTilehunting</string>
-    <string name="extension_name">Tilehunting</string>
-    <string name="explored_tiles">Explored Tiles</string>
-    <string name="explored_tiles_description">Tiles you have explored</string>
-    <string name="explored_tiles_trip">Recent Tiles</string>
-    <string name="explored_tiles_trip_description">Tiles you have explored recently</string>
-    <string name="explored_new_tiles_trip">New Tiles</string>
-    <string name="explored_new_tiles_trip_description">New tiles you have explored recently</string>
-    <string name="square_size">Square</string>
-    <string name="square_size_description">Size of your biggest square</string>
-    <string name="dual_trip">Dual recent tiles</string>
-    <string name="dual_trip_description">Dual field with both recently explored and new tiles</string>
+    <string name="app_name">Squadrating</string>
+    <string name="extension_name">Squadrating</string>
+    <string name="explored_squadrats">Explored Squadrats</string>
+    <string name="explored_squadrats_description">Squadrats you have explored</string>
+    <string name="explored_squadrats_trip">Recent Squadrats</string>
+    <string name="explored_squadrats_trip_description">Squadrats you have explored recently</string>
+    <string name="explored_new_squadrats_trip">New Squadrats</string>
+    <string name="explored_new_squadrats_trip_description">New squadrats you have explored recently</string>
+    <string name="ubersquadrat_size">Square</string>
+    <string name="ubersquadrat_size_description">Size of your biggest ubersquadrat</string>
+    <string name="dual_trip">Dual recent squadrats</string>
+    <string name="dual_trip_description">Dual field with both recently explored and new squadrats</string>
     <string name="dual_alltime">Dual statshunter</string>
-    <string name="dual_alltime_description">Dual field with explored tiles and square size</string>
+    <string name="dual_alltime_description">Dual field with explored squadrats and ubersquadrat size</string>
 </resources>

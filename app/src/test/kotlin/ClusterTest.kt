@@ -1,28 +1,28 @@
-package de.klabz.karootilehunting
+package bzh.klabz.squadrating
 
 import org.junit.Test
 
 class ClusterTest {
     @Test
     fun testCluster(){
-        val centerTile = Tile(8815, 5481)
-        val tileLoadRadius = 5
-        val tiles = setOf(Tile(8815, 5481))
+        val centerSquadrat = Squadrat(8815, 5481)
+        val squadratLoadRadius = 5
+        val squadrats = setOf(Squadrat(8815, 5481))
 
-        val viewSquare = Square(centerTile.x - tileLoadRadius, centerTile.y - tileLoadRadius, tileLoadRadius * 2)
-        val tileLoadRange = centerTile.x - tileLoadRadius..centerTile.x + tileLoadRadius
+        val viewUbersquadrat = Ubersquadrat(centerSquadrat.x - squadratLoadRadius, centerSquadrat.y - squadratLoadRadius, squadratLoadRadius * 2)
+        val squadratLoadRange = centerSquadrat.x - squadratLoadRadius..centerSquadrat.x + squadratLoadRadius
 
-        val largestSquare = Square.getBiggestSquare(tiles)
+        val largestUbersquadrat = Ubersquadrat.getBiggestUbersquadrat(squadrats)
 
-        val tilesInSquare = tiles.filter { largestSquare?.isInside(it) == true }.toSet()
-        val tilesNotInSquare = tiles - tilesInSquare
-        val unexploredTiles = viewSquare.getAllTiles() - tiles
+        val squadratsInUbersquadrat = squadrats.filter { largestUbersquadrat?.isInside(it) == true }.toSet()
+        val squadratsNotInUbersquadrat = squadrats - squadratsInUbersquadrat
+        val unexploredSquadrats = viewUbersquadrat.getAllSquadrats() - squadrats
 
-        val squareCluster = clusterTiles(tilesInSquare).single()
-        val clusteredExploredTiles = clusterTiles(tilesNotInSquare)
-        val clusteredUnexploredTiles = clusterTiles(unexploredTiles)
+        val ubersquadratCluster = clusterSquadrats(squadratsInUbersquadrat).single()
+        val clusteredExploredSquadrats = clusterSquadrats(squadratsNotInUbersquadrat)
+        val clusteredUnexploredSquadrats = clusterSquadrats(unexploredSquadrats)
 
-        val squareClusterGridLines = squareCluster.getGridPolylines()
+        val ubersquadratClusterGridLines = ubersquadratCluster.getGridPolylines()
 
     }
 }

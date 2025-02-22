@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    namespace = "de.klabz.karootilehunting"
+    namespace = "bzh.klabz.squadrating"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "de.klabz.karootilehunting"
+        applicationId = "bzh.klabz.squadrating"
         minSdk = 26
         targetSdk = 35
         versionCode = 6
@@ -54,7 +54,7 @@ android {
         compose = true
     }
 }
-            
+
 dependencies {
     implementation(libs.mapbox.sdk.turf)
     implementation(libs.hammerhead.karoo.ext)
