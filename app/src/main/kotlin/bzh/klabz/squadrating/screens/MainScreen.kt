@@ -50,6 +50,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import bzh.klabz.squadrating.calcYard
 import bzh.klabz.squadrating.Squadrat
 import bzh.klabz.squadrating.datastores.exploredSquadratsDataStore
 import bzh.klabz.squadrating.datastores.userPreferencesDataStore
@@ -82,6 +83,7 @@ fun MainScreen(onFinish: () -> Unit) {
     var downloadedActivities by remember { mutableIntStateOf(0) }
     var exploredSquadratsCount by remember { mutableIntStateOf(0) }
     var ubersquadratSize by remember { mutableIntStateOf(0) }
+    var yard by remember { mutableIntStateOf(0) }
     var recentSquadratsCount by remember { mutableIntStateOf(0) }
     var recentNewSquadratsCount by remember { mutableIntStateOf(0) }
 
@@ -100,6 +102,8 @@ fun MainScreen(onFinish: () -> Unit) {
             recentSquadratsCount = exploredSquadratsStore?.recentlyExploredSquadratsCount ?: 0
             recentNewSquadratsCount = exploredSquadratsStore?.recentlyExploredNewSquadratsCount ?: 0
             exploredSquadratsCount = exploredSquadrats?.size ?: 0
+            // TODO: probably want to store yard in store, too..
+            yard = if (exploredSquadrats == null) 0 else calcYard(exploredSquadrats)
             ubersquadratSize = exploredSquadratsStore?.biggestUbersquadratSize ?: 0
             hideGrid = settingsStore?.hideGridLines ?: false
             isDisabled = settingsStore?.isDisabled ?: false
@@ -125,19 +129,33 @@ fun MainScreen(onFinish: () -> Unit) {
                 .fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.weight(4f)) {
                     Text("Activities:")
-                    Text("Squadrats:")
-                    Text("Ubersquadrat:")
-                    Text("Recent:")
-                    Text("New:")
+                    if (downloadedActivities > 0) {
+                        Text("Squadrats:")
+                        Text("Squadratinhos:")
+                        Text("Yard:")
+                        Text("Yardinho:")
+                        Text("Ubersquadrat:")
+                        Text("Ubersquadratinho:")
+                        Text("Recent squadrats:")
+                        Text("New squadrats:")
+                        Text("New squadratinhos:")
+                    }
                 }
-                Column(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.weight(2f)) {
                     Text("$downloadedActivities")
-                    Text("$exploredSquadratsCount")
-                    Text("$ubersquadratSize")
-                    Text("$recentSquadratsCount")
-                    Text("$recentNewSquadratsCount")
+                    if (downloadedActivities > 0) {
+                        Text("$exploredSquadratsCount")
+                        Text("0") // TODO squadratinhos
+                        Text("$yard")
+                        Text("0") // TODO yardinho
+                        Text("${ubersquadratSize}x${ubersquadratSize}")
+                        Text("0x0") // TODO ubersquadratinho
+                        Text("$recentSquadratsCount")
+                        Text("$recentNewSquadratsCount")
+                        Text("0") // TODO squadratinhos
+                    }
                 }
             }
 
@@ -215,6 +233,7 @@ fun MainScreen(onFinish: () -> Unit) {
                 Text("Connect StatsHunters")
             }
 
+            // TODO: same for squadratinhos
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Switch(checked = !isDisabled, onCheckedChange = { isDisabled = !it})
                 Spacer(modifier = Modifier.width(10.dp))
@@ -222,6 +241,7 @@ fun MainScreen(onFinish: () -> Unit) {
             }
 
             if (!isDisabled){
+                // TODO: same for squadratinhos
                 apply {
                     val dropdownOptions = SquadratDrawRangeEnum.entries.toList().map { unit -> DropdownOption("${unit.radius}", "${unit.radius}") }
                     val dropdownInitialSelection by remember(squadratLoadRange) {
@@ -238,6 +258,7 @@ fun MainScreen(onFinish: () -> Unit) {
                     Text("Show grid")
                 }
 
+                // TODO: remove this feature?
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Switch(checked = showActivityLines, onCheckedChange = { showActivityLines = it})
                     Spacer(modifier = Modifier.width(10.dp))
@@ -357,6 +378,7 @@ fun MainScreen(onFinish: () -> Unit) {
                                         }
                                         if (changedCode) {
                                             ctx.exploredSquadratsDataStore.updateData { exploredSquadrats ->
+                                                // TODO: also clear data
                                                 exploredSquadrats.toBuilder().setLastDownloadedAt(0).build()
                                             }
                                         }

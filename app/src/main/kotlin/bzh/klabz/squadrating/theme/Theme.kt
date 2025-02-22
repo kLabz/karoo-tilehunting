@@ -11,7 +11,7 @@ import bzh.klabz.squadrating.R
 fun AppTheme(
     content: @Composable () -> Unit,
 ) {
-    // TODO: dark?
+    // TODO: dark? doesn't look good at all without changes right now..
     val scheme = lightColorScheme(
         primary = Color(0xFF214559),
         secondary = Color(0xFF636363),
