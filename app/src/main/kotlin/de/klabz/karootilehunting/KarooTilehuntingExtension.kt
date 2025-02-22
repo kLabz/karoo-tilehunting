@@ -22,6 +22,7 @@ import io.hammerhead.karooext.models.MapEffect
 import io.hammerhead.karooext.models.OnLocationChanged
 import io.hammerhead.karooext.models.RideState
 import io.hammerhead.karooext.models.WriteToRecordMesg
+import io.hammerhead.karooext.models.WriteToSessionMesg
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -75,9 +76,18 @@ class KarooTilehuntingExtension : KarooExtension("karoo-tilehunting", "1.0-beta6
         )
     }
 
-    private val squareSizeField by lazy {
+    private val exploredTilesField by lazy {
         DeveloperField(
             fieldDefinitionNumber = 1,
+            fitBaseTypeId = 132, // FitBaseType.UInt16
+            fieldName = "Explored tiles",
+            units = "tiles",
+        )
+    }
+
+    private val squareSizeField by lazy {
+        DeveloperField(
+            fieldDefinitionNumber = 2,
             fitBaseTypeId = 131, // FitBaseType.UInt8
             fieldName = "Square size",
             units = "squares",
@@ -98,25 +108,41 @@ class KarooTilehuntingExtension : KarooExtension("karoo-tilehunting", "1.0-beta6
                 }
 
             var lastTilesCount:UShort = 0u;
+            var lastNewTilesCount:UShort = 0u;
             var lastSquareSize:UByte = 0u;
 
             combine(exploredTilesFlow, rideStateFlow) { exploredTiles, rideState -> Pair(exploredTiles, rideState) }
                 .filter { (exploredTiles, rideState) ->
-                    !(rideState is RideState.Recording) && ((lastTilesCount != exploredTiles.recentlyExploredNewTiles.size.toUShort()) || (lastSquareSize != exploredTiles.square?.size?.toUByte() ?: 0u))
+                    !(rideState is RideState.Idle) && (
+                        (lastTilesCount != exploredTiles.recentlyExploredTiles.size.toUShort())
+                        || (lastNewTilesCount != exploredTiles.recentlyExploredNewTiles.size.toUShort())
+                        || (lastSquareSize != exploredTiles.square?.size?.toUByte() ?: 0u)
+                    )
                 }
-                .collect { (exploredTiles, _) ->
-                    var lastTilesCount_ = exploredTiles.recentlyExploredNewTiles.size.toUShort()
+                .collect { (exploredTiles, rideState) ->
+                    var lastTilesCount_ = exploredTiles.recentlyExploredTiles.size.toUShort()
                     if (lastTilesCount != lastTilesCount_) {
-                        Log.i(TAG, "Writing new tiles count: ${lastTilesCount_}")
+                        Log.i(TAG, "Writing explored tiles count: ${lastTilesCount_}")
                         lastTilesCount = lastTilesCount_
-                        emitter.onNext(WriteToRecordMesg(FieldValue(newTilesField, lastTilesCount.toDouble())))
+                        emitter.onNext(WriteToRecordMesg(FieldValue(exploredTilesField, lastTilesCount.toDouble())))
                     }
+                    if (rideState is RideState.Paused) emitter.onNext(WriteToSessionMesg(FieldValue(exploredTilesField, lastTilesCount.toDouble())))
+
+                    var lastNewTilesCount_ = exploredTiles.recentlyExploredNewTiles.size.toUShort()
+                    if (lastNewTilesCount != lastNewTilesCount_) {
+                        Log.i(TAG, "Writing new tiles count: ${lastNewTilesCount_}")
+                        lastNewTilesCount = lastNewTilesCount_
+                        emitter.onNext(WriteToRecordMesg(FieldValue(newTilesField, lastNewTilesCount.toDouble())))
+                    }
+                    if (rideState is RideState.Paused) emitter.onNext(WriteToSessionMesg(FieldValue(exploredTilesField, lastTilesCount.toDouble())))
+
                     var lastSquareSize_ = exploredTiles.square?.size?.toUByte() ?: 0u
                     if (lastSquareSize != lastSquareSize_) {
                         Log.i(TAG, "Writing new square size: ${lastSquareSize_}")
                         lastSquareSize = lastSquareSize_
                         emitter.onNext(WriteToRecordMesg(FieldValue(squareSizeField, lastSquareSize.toDouble())))
                     }
+                    if (rideState is RideState.Paused) emitter.onNext(WriteToSessionMesg(FieldValue(squareSizeField, lastSquareSize.toDouble())))
                 }
         }
 
