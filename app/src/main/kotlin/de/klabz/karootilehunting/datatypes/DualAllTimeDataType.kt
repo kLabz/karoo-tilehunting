@@ -1,6 +1,8 @@
 package de.klabz.karootilehunting.datatypes
 
 import android.content.Context
+import androidx.core.content.ContextCompat
+import androidx.compose.ui.graphics.Color
 import android.util.Log
 import androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi
 import androidx.glance.appwidget.GlanceRemoteViews
@@ -14,11 +16,14 @@ import io.hammerhead.karooext.internal.ViewEmitter
 import io.hammerhead.karooext.models.DataPoint
 import io.hammerhead.karooext.models.DataType
 import io.hammerhead.karooext.models.StreamState
+import io.hammerhead.karooext.models.UpdateGraphicConfig
 import io.hammerhead.karooext.models.ViewConfig
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,7 +34,6 @@ class DualAllTimeDataType(
     private val applicationContext: Context
 ) : DataTypeImpl("karoo-tilehunting", "dual_alltime") {
     protected val glance = GlanceRemoteViews()
-    private var viewjob: Job? = null
 
     override fun startStream(emitter: Emitter<StreamState>) {
         val job = CoroutineScope(Dispatchers.IO).launch {
@@ -59,51 +63,31 @@ class DualAllTimeDataType(
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
         val scope = CoroutineScope(Dispatchers.IO + Job())
 
-        viewjob = scope.launch {
-            try {
+        val configJob = scope.launch {
+            emitter.onNext(UpdateGraphicConfig(showHeader = false))
+            awaitCancellation()
+        }
+
+        val viewjob = scope.launch {
             applicationContext.exploredTilesDataStore.data.collect { exploredTiles ->
                 val tiles = exploredTiles.exploredTilesCount
                 val squareSize = exploredTiles.biggestSquareSize
                 var view = glance.compose(context, DpSize.Unspecified) {
-                    DoubleScreenSelector(
-                        true,
-                        tiles.toDouble(),
-                        squareSize.toDouble(),
+                    DoubleTypesVerticalScreen(
+                        tiles.toString(),
+                        "${squareSize}x${squareSize}",
                         R.drawable.been_here,
                         R.drawable.area,
-                        "Tiles",
-                        "Square",
-                        // FieldSize.MEDIUM,
-                        false, // TODO try true
-                        // ViewConfig.Alignment.RIGHT,
-                        "Tiles data",
-                        false
+                        Color(ContextCompat.getColor(applicationContext, R.color.icongreen))
                     )
                 }.remoteViews
                 emitter.updateView(view)
             }
-
-            } catch (e: CancellationException) {
-                Log.d(extension, "DualAllTime ViewJob cancelled")
-            } catch (e: Exception) {
-                Log.e(extension, "DualAllTime ViewJob error", e)
-                if (!scope.isActive) return@launch
-
-                viewjob?.let {
-                    if (it.isActive) {
-                        it.cancel()
-                        Log.d(extension, "DualAllTime ViewJob cancelled")
-                    }
-                }
-                viewjob = null
-
-                delay(1000)
-                startView(context, config, emitter)
-            }
         }
 
         emitter.setCancellable {
-            viewjob!!.cancel()
+            configJob.cancel()
+            viewjob.cancel()
         }
     }
 }

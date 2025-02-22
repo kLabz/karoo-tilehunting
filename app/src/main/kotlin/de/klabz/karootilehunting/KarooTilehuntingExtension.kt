@@ -3,6 +3,8 @@ package de.klabz.karootilehunting
 import android.content.Context
 import android.util.Log
 import de.klabz.karootilehunting.datastores.exploredTilesDataStore
+import de.klabz.karootilehunting.datatypes.DualAllTimeDataType
+import de.klabz.karootilehunting.datatypes.DualRecentDataType
 import de.klabz.karootilehunting.datatypes.ExploredTilesDataType
 import de.klabz.karootilehunting.datatypes.RecentlyExploredTilesDataType
 import de.klabz.karootilehunting.datatypes.RecentlyExploredNewTilesDataType
@@ -47,6 +49,8 @@ class KarooTilehuntingExtension : KarooExtension("karoo-tilehunting", "1.0-beta6
 
     override val types by lazy {
         listOf(
+            DualAllTimeDataType(karooSystem.karooSystemService, applicationContext),
+            DualRecentDataType(karooSystem.karooSystemService, applicationContext),
             ExploredTilesDataType(karooSystem.karooSystemService, applicationContext),
             RecentlyExploredTilesDataType(karooSystem.karooSystemService, applicationContext),
             RecentlyExploredNewTilesDataType(karooSystem.karooSystemService, applicationContext),
