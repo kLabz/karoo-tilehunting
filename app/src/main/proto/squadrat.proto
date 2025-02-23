@@ -7,17 +7,30 @@ message Squadrat {
   int32 y = 2;
 }
 
+message Squadratinho {
+  int32 x = 1;
+  int32 y = 2;
+}
+
 message ExploredSquadrats {
   repeated Squadrat exploredSquadrats = 1;
   repeated Squadrat recentlyExploredSquadrats = 2;
   repeated Squadrat recentlyExploredNewSquadrats = 3;
 
-  uint64 lastDownloadedAt = 4;
-  bool isDownloading = 5;
-  uint32 downloadedActivities = 6;
-  string lastDownloadError = 7;
+  repeated Squadratinho exploredSquadratinhos = 4;
+  repeated Squadratinho recentlyExploredSquadratinhos = 5;
+  repeated Squadratinho recentlyExploredNewSquadratinhos = 6;
 
-  uint32 biggestUbersquadratX = 8;
-  uint32 biggestUbersquadratY = 9;
-  uint32 biggestUbersquadratSize = 10;
+  uint64 lastDownloadedAt = 7;
+  bool isDownloading = 8;
+  uint32 downloadedActivities = 9;
+  string lastDownloadError = 10;
+
+  uint32 biggestUbersquadratX = 11;
+  uint32 biggestUbersquadratY = 12;
+  uint32 biggestUbersquadratSize = 13;
+
+  uint32 biggestUbersquadratinhoX = 14;
+  uint32 biggestUbersquadratinhoY = 15;
+  uint32 biggestUbersquadratinhoSize = 16;
 }

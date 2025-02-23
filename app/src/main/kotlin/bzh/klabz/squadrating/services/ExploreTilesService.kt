@@ -13,7 +13,9 @@ import bzh.klabz.squadrating.SquadratingExtension.ExploredSquadratsData
 import bzh.klabz.squadrating.R
 import bzh.klabz.squadrating.Ubersquadrat
 import bzh.klabz.squadrating.Squadrat
+import bzh.klabz.squadrating.Squadratinho
 import bzh.klabz.squadrating.coordsToSquadrat
+import bzh.klabz.squadrating.coordsToSquadratinho
 import bzh.klabz.squadrating.datastores.exploredSquadratsDataStore
 import io.hammerhead.karooext.models.InRideAlert
 import io.hammerhead.karooext.models.OnLocationChanged
@@ -34,12 +36,27 @@ class ExploreSquadratsService(private val karooSystem: KarooSystemServiceProvide
         return CoroutineScope(Dispatchers.IO).launch {
             val exploredSquadratsFlow = context.exploredSquadratsDataStore.data
                 .map {
-                    val exploredSquadrats = it.exploredSquadratsList.map { tile -> Squadrat(tile.x, tile.y) }.toSet()
-                    val recentlyExploredSquadrats = it.recentlyExploredSquadratsList.map { tile -> Squadrat(tile.x, tile.y) }.toSet()
-                    val recentlyExploredNewSquadrats = it.recentlyExploredNewSquadratsList.map { tile -> Squadrat(tile.x, tile.y) }.toSet()
+                    // Squadrats
+                    val exploredSquadrats = it.exploredSquadratsList.map { squadrat -> Squadrat(squadrat.x, squadrat.y) }.toSet()
+                    val recentlyExploredSquadrats = it.recentlyExploredSquadratsList.map { squadrat -> Squadrat(squadrat.x, squadrat.y) }.toSet()
+                    val recentlyExploredNewSquadrats = it.recentlyExploredNewSquadratsList.map { squadrat -> Squadrat(squadrat.x, squadrat.y) }.toSet()
                     val ubersquadrat = if(it.biggestUbersquadratX != 0 && it.biggestUbersquadratY != 0 && it.biggestUbersquadratSize != 0) Ubersquadrat(it.biggestUbersquadratX, it.biggestUbersquadratY, it.biggestUbersquadratSize) else null
 
-                    ExploredSquadratsData(exploredSquadrats, recentlyExploredSquadrats, recentlyExploredNewSquadrats, ubersquadrat)
+                    // Squadratinhos
+                    val exploredSquadratinhos = it.exploredSquadratinhosList.map { squadratinho -> Squadratinho(squadratinho.x, squadratinho.y) }.toSet()
+                    val recentlyExploredNewSquadratinhos = it.recentlyExploredNewSquadratinhosList.map { squadratinho -> Squadratinho(squadratinho.x, squadratinho.y) }.toSet()
+
+                    ExploredSquadratsData(
+                        // Squadrats
+                        exploredSquadrats,
+                        recentlyExploredSquadrats,
+                        recentlyExploredNewSquadrats,
+                        ubersquadrat,
+
+                        // Squadratinhos
+                        exploredSquadratinhos,
+                        recentlyExploredNewSquadratinhos,
+                    )
                 }
 
             val locationFlow = karooSystem.stream<OnLocationChanged>()
@@ -50,13 +67,13 @@ class ExploreSquadratsService(private val karooSystem: KarooSystemServiceProvide
             combine(exploredSquadratsFlow, locationFlow, rideStateFlow) { exploredSquadrats, location, rideState -> StreamData(exploredSquadrats, location, rideState) }
                 .filter { (_, _, rideState) -> rideState is RideState.Recording }
                 .filter { (_, location, _) ->
-                    val tile = coordsToSquadrat(location.lat, location.lng)
+                    val squadrat = coordsToSquadrat(location.lat, location.lng)
 
                     val tileCorners = listOf(
-                        CurrentCorner.TOP_LEFT.getCoords(tile),
-                        CurrentCorner.TOP_RIGHT.getCoords(tile),
-                        CurrentCorner.BOTTOM_RIGHT.getCoords(tile),
-                        CurrentCorner.BOTTOM_LEFT.getCoords(tile)
+                        CurrentCorner.TOP_LEFT.getCoords(squadrat),
+                        CurrentCorner.TOP_RIGHT.getCoords(squadrat),
+                        CurrentCorner.BOTTOM_RIGHT.getCoords(squadrat),
+                        CurrentCorner.BOTTOM_LEFT.getCoords(squadrat)
                     )
 
                     val point = Point.fromLngLat(location.lng, location.lat)
@@ -68,31 +85,67 @@ class ExploreSquadratsService(private val karooSystem: KarooSystemServiceProvide
                         TurfConstants.UNIT_DEGREES
                     )
 
-                    // Check if point is inside the tile boundaries with margin
-                    point.longitude() > tileCorners[0].longitude() + margin &&
+                    // Check if point is inside the squadrat boundaries with margin
+                    val newSquadrat = point.longitude() > tileCorners[0].longitude() + margin &&
+                        point.longitude() < tileCorners[1].longitude() - margin &&
+                        point.latitude() < tileCorners[0].latitude() - margin &&
+                        point.latitude() > tileCorners[3].latitude() + margin
+
+                    if (newSquadrat) {
+                        true
+                    } else {
+                        val squadratinho = coordsToSquadratinho(location.lat, location.lng)
+
+                        val tileCorners = listOf(
+                            CurrentCorner.TOP_LEFT.getCoords(squadratinho),
+                            CurrentCorner.TOP_RIGHT.getCoords(squadratinho),
+                            CurrentCorner.BOTTOM_RIGHT.getCoords(squadratinho),
+                            CurrentCorner.BOTTOM_LEFT.getCoords(squadratinho)
+                        )
+
+                        // val point = Point.fromLngLat(location.lng, location.lat)
+
+                        // Convert margin from meters to degrees (approximate)
+                        val margin = TurfConversion.convertLength(
+                            20.0, // TODO: adjust for squadratinhos?
+                            TurfConstants.UNIT_METERS,
+                            TurfConstants.UNIT_DEGREES
+                        )
+
+                        // Check if point is inside the squadratinho boundaries with margin
+                        point.longitude() > tileCorners[0].longitude() + margin &&
                             point.longitude() < tileCorners[1].longitude() - margin &&
                             point.latitude() < tileCorners[0].latitude() - margin &&
                             point.latitude() > tileCorners[3].latitude() + margin
+                    }
                 }.filter { (exploredSquadrats, location) ->
-                    val tile = coordsToSquadrat(location.lat, location.lng)
+                    val squadrat = coordsToSquadrat(location.lat, location.lng)
+                    val squadratinho = coordsToSquadratinho(location.lat, location.lng)
 
-                    // New tile
-                    !exploredSquadrats.exploredSquadrats.contains(tile) && !exploredSquadrats.recentlyExploredNewSquadrats.contains(tile)
-                    // New recent tile
-                    || !exploredSquadrats.recentlyExploredSquadrats.contains(tile)
+                    // New squadrat
+                    (!exploredSquadrats.exploredSquadrats.contains(squadrat) && !exploredSquadrats.recentlyExploredNewSquadrats.contains(squadrat))
+                    // New recent squadrat
+                    || !exploredSquadrats.recentlyExploredSquadrats.contains(squadrat)
+                    // New squadratinho
+                    || (!exploredSquadrats.exploredSquadratinhos.contains(squadratinho) && !exploredSquadrats.recentlyExploredNewSquadratinhos.contains(squadratinho))
                 }.collect { (exploredSquadrats, location) ->
                     val currentSquadrat = coordsToSquadrat(location.lat, location.lng)
-                    val isNew = !exploredSquadrats.exploredSquadrats.contains(currentSquadrat) && !exploredSquadrats.recentlyExploredNewSquadrats.contains(currentSquadrat)
+                    val currentSquadratinho = coordsToSquadratinho(location.lat, location.lng)
 
-                    if (isNew) Log.i(TAG, "New tile explored: ${location.lat}, ${location.lng}")
-                    else Log.i(TAG, "Squadrat explored: ${location.lat}, ${location.lng}")
+                    val isNewSquadrat = !exploredSquadrats.exploredSquadrats.contains(currentSquadrat) && !exploredSquadrats.recentlyExploredNewSquadrats.contains(currentSquadrat)
+                    val isRecentSquadrat = !exploredSquadrats.recentlyExploredSquadrats.contains(currentSquadrat)
+                    val isNewSquadratinho = !exploredSquadrats.exploredSquadratinhos.contains(currentSquadratinho) && !exploredSquadrats.recentlyExploredNewSquadratinhos.contains(currentSquadratinho)
 
-                    if (isNew) {
+                    if (isNewSquadrat) Log.i(TAG, "New squadrat explored: ${location.lat}, ${location.lng}")
+                    else if (isRecentSquadrat) Log.i(TAG, "Squadrat explored: ${location.lat}, ${location.lng}")
+                    if (isNewSquadratinho) Log.i(TAG, "New squadratinho explored: ${location.lat}, ${location.lng}")
+
+                    if (isNewSquadrat) {
                         val msg = when (exploredSquadrats.recentlyExploredNewSquadrats.size) {
-                            0, 1 -> "New tile explored"
-                            2 -> "2nd new tile!"
-                            3 -> "3rd new tile!"
-                            else -> "${exploredSquadrats.recentlyExploredNewSquadrats.size}th new tile!"
+                            0, 1 -> "New squadrat explored"
+                            2 -> "2nd new squadrat!"
+                            3 -> "3rd new squadrat!"
+                            else -> "${exploredSquadrats.recentlyExploredNewSquadrats.size}th new squadrat!"
                         }
 
                         karooSystem.karooSystemService.dispatch(
@@ -119,10 +172,20 @@ class ExploreSquadratsService(private val karooSystem: KarooSystemServiceProvide
 
                     context.exploredSquadratsDataStore.updateData { data ->
                         val exploredSquadratsSet = data.exploredSquadratsList.map { Squadrat(it.x, it.y) }.toSet()
-                        val exploredSquadrats = if (isNew) exploredSquadratsSet + currentSquadrat else exploredSquadratsSet
-                        val recentlyExploredSquadrats = data.recentlyExploredSquadratsList.map { Squadrat(it.x, it.y) }.toSet() + currentSquadrat
+                        val exploredSquadrats = if (isNewSquadrat) exploredSquadratsSet + currentSquadrat else exploredSquadratsSet
+
+                        val exploredSquadratinhosSet = data.exploredSquadratinhosList.map { Squadratinho(it.x, it.y) }.toSet()
+                        val exploredSquadratinhos = if (isNewSquadratinho) exploredSquadratinhosSet + currentSquadratinho else exploredSquadratinhosSet
+
+                        val recentlyExploredSquadratsSet = data.recentlyExploredSquadratsList.map { Squadrat(it.x, it.y) }.toSet()
+                        val recentlyExploredSquadrats = if (isRecentSquadrat) recentlyExploredSquadratsSet + currentSquadrat else recentlyExploredSquadratsSet
+
                         val recentlyExploredNewSquadratsSet = data.recentlyExploredNewSquadratsList.map { Squadrat(it.x, it.y) }.toSet()
-                        val recentlyExploredNewSquadrats = if (isNew) recentlyExploredNewSquadratsSet + currentSquadrat else recentlyExploredNewSquadratsSet
+                        val recentlyExploredNewSquadrats = if (isNewSquadrat) recentlyExploredNewSquadratsSet + currentSquadrat else recentlyExploredNewSquadratsSet
+
+                        val recentlyExploredNewSquadratinhosSet = data.recentlyExploredNewSquadratinhosList.map { Squadratinho(it.x, it.y) }.toSet()
+                        val recentlyExploredNewSquadratinhos = if (isNewSquadratinho) recentlyExploredNewSquadratinhosSet + currentSquadratinho else recentlyExploredNewSquadratinhosSet
+
                         val updatedUbersquadrat = Ubersquadrat.getBiggestUbersquadrat(exploredSquadrats)
 
                         if (updatedUbersquadrat != null && updatedUbersquadrat!!.size > data.biggestUbersquadratSize) {
@@ -140,11 +203,15 @@ class ExploreSquadratsService(private val karooSystem: KarooSystemServiceProvide
 
                         data.toBuilder()
                             .clearRecentlyExploredSquadrats()
-                            .addAllRecentlyExploredSquadrats(recentlyExploredSquadrats.map { tile -> bzh.klabz.squadrating.data.Squadrat.newBuilder().setX(tile.x).setY(tile.y).build() })
+                            .addAllRecentlyExploredSquadrats(recentlyExploredSquadrats.map { squadrat -> bzh.klabz.squadrating.data.Squadrat.newBuilder().setX(squadrat.x).setY(squadrat.y).build() })
                             .clearRecentlyExploredNewSquadrats()
-                            .addAllRecentlyExploredNewSquadrats(recentlyExploredNewSquadrats.map { tile -> bzh.klabz.squadrating.data.Squadrat.newBuilder().setX(tile.x).setY(tile.y).build() })
+                            .addAllRecentlyExploredNewSquadrats(recentlyExploredNewSquadrats.map { squadrat -> bzh.klabz.squadrating.data.Squadrat.newBuilder().setX(squadrat.x).setY(squadrat.y).build() })
+                            .clearRecentlyExploredNewSquadratinhos()
+                            .addAllRecentlyExploredNewSquadratinhos(recentlyExploredNewSquadratinhos.map { squadratinho -> bzh.klabz.squadrating.data.Squadratinho.newBuilder().setX(squadratinho.x).setY(squadratinho.y).build() })
                             .clearExploredSquadrats()
-                            .addAllExploredSquadrats(exploredSquadrats.map { tile -> bzh.klabz.squadrating.data.Squadrat.newBuilder().setX(tile.x).setY(tile.y).build() })
+                            .addAllExploredSquadrats(exploredSquadrats.map { squadrat -> bzh.klabz.squadrating.data.Squadrat.newBuilder().setX(squadrat.x).setY(squadrat.y).build() })
+                            .clearExploredSquadratinhos()
+                            .addAllExploredSquadratinhos(exploredSquadratinhos.map { squadratinho -> bzh.klabz.squadrating.data.Squadratinho.newBuilder().setX(squadratinho.x).setY(squadratinho.y).build() })
                             .setBiggestUbersquadratX(updatedUbersquadrat?.x ?: 0)
                             .setBiggestUbersquadratY(updatedUbersquadrat?.y ?: 0)
                             .setBiggestUbersquadratSize(updatedUbersquadrat?.size ?: 0)

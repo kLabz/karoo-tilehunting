@@ -60,10 +60,19 @@ class SquadratingExtension : KarooExtension("squadrating", "1.0-beta6") {
     }
 
     data class ExploredSquadratsData(
+        // Squadrats
         val exploredSquadrats: Set<Squadrat>,
         val recentlyExploredSquadrats: Set<Squadrat>,
         val recentlyExploredNewSquadrats: Set<Squadrat>,
-        val ubersquadrat: Ubersquadrat?
+        val ubersquadrat: Ubersquadrat?,
+        // TODO: val yard: Int, (with area?)
+
+        // Squadratinhos
+        val exploredSquadratinhos: Set<Squadratinho>,
+        // TODO: val recentlyExploredSquadratinhos: Set<Squadratinho>, (?)
+        val recentlyExploredNewSquadratinhos: Set<Squadratinho>,
+        // TODO: val ubersquadratinho: Ubersquadratinho?,
+        // TODO: val yardinho: Int (with area?)
     )
 
     override fun startMap(emitter: Emitter<MapEffect>) {
@@ -104,12 +113,26 @@ class SquadratingExtension : KarooExtension("squadrating", "1.0-beta6") {
             val rideStateFlow = karooSystem.stream<RideState>()
             val exploredSquadratsFlow = context.exploredSquadratsDataStore.data
                 .map {
+                    // Squadrats
                     val exploredSquadrats = it.exploredSquadratsList.map { squadrat -> Squadrat(squadrat.x, squadrat.y) }.toSet()
                     val recentlyExploredSquadrats = it.recentlyExploredSquadratsList.map { squadrat -> Squadrat(squadrat.x, squadrat.y) }.toSet()
                     val recentlyExploredNewSquadrats = it.recentlyExploredNewSquadratsList.map { squadrat -> Squadrat(squadrat.x, squadrat.y) }.toSet()
                     val ubersquadrat = if(it.biggestUbersquadratX != 0 && it.biggestUbersquadratY != 0 && it.biggestUbersquadratSize != 0) Ubersquadrat(it.biggestUbersquadratX, it.biggestUbersquadratY, it.biggestUbersquadratSize) else null
 
-                    ExploredSquadratsData(exploredSquadrats, recentlyExploredSquadrats, recentlyExploredNewSquadrats, ubersquadrat)
+                    // Squadratinhos
+                    val exploredSquadratinhos = it.exploredSquadratinhosList.map { squadratinho -> Squadratinho(squadratinho.x, squadratinho.y) }.toSet()
+                    val recentlyExploredNewSquadratinhos = it.recentlyExploredNewSquadratinhosList.map { squadratinho -> Squadratinho(squadratinho.x, squadratinho.y) }.toSet()
+
+                    ExploredSquadratsData(
+                        // Squadrats
+                        exploredSquadrats,
+                        recentlyExploredSquadrats,
+                        recentlyExploredNewSquadrats,
+                        ubersquadrat,
+                        // Squadratinhos
+                        exploredSquadratinhos,
+                        recentlyExploredNewSquadratinhos,
+                    )
                 }
 
             var lastSquadratsCount:UShort = 0u;

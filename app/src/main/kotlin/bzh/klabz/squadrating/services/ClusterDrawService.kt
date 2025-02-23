@@ -6,6 +6,7 @@ import androidx.annotation.ColorRes
 import bzh.klabz.squadrating.Cluster
 import bzh.klabz.squadrating.R
 import bzh.klabz.squadrating.Squadrat
+import bzh.klabz.squadrating.Squadratinho
 import bzh.klabz.squadrating.SquadratingExtension.Companion.TAG
 import bzh.klabz.squadrating.SquadratingExtension.ExploredSquadratsData
 import bzh.klabz.squadrating.Ubersquadrat
@@ -67,12 +68,27 @@ class ClusterDrawService(private val karooSystem: KarooSystemServiceProvider,
             val gpsSquadratFlow = gpsFlow.map { coordsToSquadrat(it.latitude, it.longitude) }.throttle(10_000L)
 
             val exploredSquadratsFlow = applicationContext.exploredSquadratsDataStore.data.map {
+                // Squadrats
                 val exploredSquadrats = it.exploredSquadratsList.map { squadrat -> Squadrat(squadrat.x, squadrat.y) }.toSet()
                 val recentlyExploredSquadrats = it.recentlyExploredSquadratsList.map { squadrat -> Squadrat(squadrat.x, squadrat.y) }.toSet()
                 val recentlyExploredNewSquadrats = it.recentlyExploredNewSquadratsList.map { squadrat -> Squadrat(squadrat.x, squadrat.y) }.toSet()
                 val ubersquadrat = if(it.biggestUbersquadratX != 0 && it.biggestUbersquadratY != 0 && it.biggestUbersquadratSize != 0) Ubersquadrat(it.biggestUbersquadratX, it.biggestUbersquadratY, it.biggestUbersquadratSize) else null
 
-                ExploredSquadratsData(exploredSquadrats, recentlyExploredSquadrats, recentlyExploredNewSquadrats, ubersquadrat)
+                // Squadratinhos
+                val exploredSquadratinhos = it.exploredSquadratinhosList.map { squadratinho -> Squadratinho(squadratinho.x, squadratinho.y) }.toSet()
+                val recentlyExploredNewSquadratinhos = it.recentlyExploredNewSquadratinhosList.map { squadratinho -> Squadratinho(squadratinho.x, squadratinho.y) }.toSet()
+
+                ExploredSquadratsData(
+                    // Squadrats
+                    exploredSquadrats,
+                    recentlyExploredSquadrats,
+                    recentlyExploredNewSquadrats,
+                    ubersquadrat,
+
+                    // Squadratinhos
+                    exploredSquadratinhos,
+                    recentlyExploredNewSquadratinhos,
+                )
             }
 
             val settingsFlow = applicationContext.userPreferencesDataStore.data

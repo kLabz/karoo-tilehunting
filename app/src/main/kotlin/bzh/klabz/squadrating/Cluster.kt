@@ -38,6 +38,32 @@ data class Squadrat(val x: Int, val y: Int) {
     }
 }
 
+@Serializable
+data class Squadratinho(val x: Int, val y: Int) {
+    fun isNeighbour(squadrat: Squadratinho): Boolean {
+        return (this.x == squadrat.x && (this.y == squadrat.y + 1 || this.y == squadrat.y - 1)) ||
+                (this.y == squadrat.y && (this.x == squadrat.x + 1 || this.x == squadrat.x - 1))
+    }
+
+    fun isSurrounded(squadratinhos: Set<Squadratinho>): Boolean {
+        return squadratinhos.contains(Squadratinho(x + 1, y)) &&
+                squadratinhos.contains(Squadratinho(x - 1, y)) &&
+                squadratinhos.contains(Squadratinho(x, y + 1)) &&
+                squadratinhos.contains(Squadratinho(x, y - 1))
+    }
+
+    fun getLon(zoom: Int = 14): Double {
+        val n = 2.0.pow(zoom)
+        return x / n * 360.0 - 180.0
+    }
+
+    fun getLat(zoom: Int = 14): Double {
+        val n = 2.0.pow(zoom)
+        val latRad = atan(sinh(Math.PI * (1 - 2 * y / n)))
+        return Math.toDegrees(latRad)
+    }
+}
+
 enum class CurrentCorner {
     TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT;
 
@@ -48,6 +74,16 @@ enum class CurrentCorner {
             TOP_RIGHT -> Point.fromLngLat(Squadrat(squadrat.x + 1, squadrat.y).getLon(), squadrat.getLat())
             BOTTOM_LEFT -> Point.fromLngLat(squadrat.getLon(), Squadrat(squadrat.x, squadrat.y + 1).getLat())
             BOTTOM_RIGHT -> Point.fromLngLat(Squadrat(squadrat.x + 1, squadrat.y + 1).getLon(), Squadrat(squadrat.x, squadrat.y + 1).getLat())
+        }
+    }
+
+    // Returns the actual (unmodified) coordinates for the given squadratinho corner.
+    fun getCoords(squadratinho: Squadratinho): Point {
+        return when (this) {
+            TOP_LEFT -> Point.fromLngLat(squadratinho.getLon(), squadratinho.getLat())
+            TOP_RIGHT -> Point.fromLngLat(Squadratinho(squadratinho.x + 1, squadratinho.y).getLon(), squadratinho.getLat())
+            BOTTOM_LEFT -> Point.fromLngLat(squadratinho.getLon(), Squadratinho(squadratinho.x, squadratinho.y + 1).getLat())
+            BOTTOM_RIGHT -> Point.fromLngLat(Squadratinho(squadratinho.x + 1, squadratinho.y + 1).getLon(), Squadratinho(squadratinho.x, squadratinho.y + 1).getLat())
         }
     }
 }
