@@ -33,6 +33,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class ExploreSquadratsService(private val karooSystem: KarooSystemServiceProvider) {
+    companion object {
+        val margin = TurfConversion.convertLength(
+            5.0,
+            TurfConstants.UNIT_METERS,
+            TurfConstants.UNIT_DEGREES
+        )
+    }
+
     fun startJob(context: Context): Job {
         val mediaPlayer = MediaPlayer.create(context, R.raw.alert6)
 
@@ -87,13 +95,6 @@ class ExploreSquadratsService(private val karooSystem: KarooSystemServiceProvide
 
                     val point = Point.fromLngLat(location.lng, location.lat)
 
-                    // Convert margin from meters to degrees (approximate)
-                    val margin = TurfConversion.convertLength(
-                        20.0,
-                        TurfConstants.UNIT_METERS,
-                        TurfConstants.UNIT_DEGREES
-                    )
-
                     // Check if point is inside the squadrat boundaries with margin
                     val newSquadrat = point.longitude() > tileCorners[0].longitude() + margin &&
                         point.longitude() < tileCorners[1].longitude() - margin &&
@@ -110,15 +111,6 @@ class ExploreSquadratsService(private val karooSystem: KarooSystemServiceProvide
                             CurrentCorner.TOP_RIGHT.getCoords(squadratinho),
                             CurrentCorner.BOTTOM_RIGHT.getCoords(squadratinho),
                             CurrentCorner.BOTTOM_LEFT.getCoords(squadratinho)
-                        )
-
-                        // val point = Point.fromLngLat(location.lng, location.lat)
-
-                        // Convert margin from meters to degrees (approximate)
-                        val margin = TurfConversion.convertLength(
-                            20.0, // TODO: adjust for squadratinhos?
-                            TurfConstants.UNIT_METERS,
-                            TurfConstants.UNIT_DEGREES
                         )
 
                         // Check if point is inside the squadratinho boundaries with margin
