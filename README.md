@@ -1,4 +1,7 @@
-# Karoo Tilehunting Extension 
+# Karoo Squadrating Extension
+
+> [!WARNING]
+> TODO: credit upstream, check licensing, update README, configure signing, make release, etc.
 
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/klabz/karoo-tilehunting/android.yml)](https://github.com/klabz/karoo-tilehunting/actions/workflows/android.yml)
 [![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/klabz/karoo-tilehunting/app-release.apk)](https://github.com/klabz/karoo-tilehunting/releases)
@@ -9,11 +12,10 @@ You can read more about tilehunting in the [StatsHunters FAQ](https://www.statsh
 
 Compatible with Karoo 2 and Karoo 3 devices.
 
-<a href="https://www.buymeacoffee.com/klabz" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+<a href="https://www.buymeacoffee.com/timklge" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy A Coffee (upstream)" height="41" width="174"></a>
 
 ![Menu](menu.png)
 ![Tiles](tiles.png)
-![Border](border.png)
 
 ## Installation
 
@@ -43,7 +45,7 @@ Make sure you are connected to WiFi for this step. The app will then draw the ou
 onto the map when you start a ride.
 
 Please note that currently, only tiles close to your current location are drawn,
-regardless of where you pan on the map if you unlock it. 
+regardless of where you pan on the map if you unlock it.
 
 The following colors are used:
 
