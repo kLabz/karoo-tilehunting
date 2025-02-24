@@ -12,11 +12,14 @@ import bzh.klabz.squadrating.SquadratingExtension.Companion.TAG
 import bzh.klabz.squadrating.SquadratingExtension.ExploredSquadratsData
 import bzh.klabz.squadrating.R
 import bzh.klabz.squadrating.Ubersquadrat
+import bzh.klabz.squadrating.Ubersquadratinho
 import bzh.klabz.squadrating.Squadrat
 import bzh.klabz.squadrating.Squadratinho
 import bzh.klabz.squadrating.coordsToSquadrat
 import bzh.klabz.squadrating.coordsToSquadratinho
 import bzh.klabz.squadrating.datastores.exploredSquadratsDataStore
+import bzh.klabz.squadrating.calcYard
+import bzh.klabz.squadrating.calcYardinho
 import io.hammerhead.karooext.models.InRideAlert
 import io.hammerhead.karooext.models.OnLocationChanged
 import io.hammerhead.karooext.models.PlayBeepPattern
@@ -41,10 +44,13 @@ class ExploreSquadratsService(private val karooSystem: KarooSystemServiceProvide
                     val recentlyExploredSquadrats = it.recentlyExploredSquadratsList.map { squadrat -> Squadrat(squadrat.x, squadrat.y) }.toSet()
                     val recentlyExploredNewSquadrats = it.recentlyExploredNewSquadratsList.map { squadrat -> Squadrat(squadrat.x, squadrat.y) }.toSet()
                     val ubersquadrat = if(it.biggestUbersquadratX != 0 && it.biggestUbersquadratY != 0 && it.biggestUbersquadratSize != 0) Ubersquadrat(it.biggestUbersquadratX, it.biggestUbersquadratY, it.biggestUbersquadratSize) else null
+                    val yard = calcYard(exploredSquadrats)
 
                     // Squadratinhos
                     val exploredSquadratinhos = it.exploredSquadratinhosList.map { squadratinho -> Squadratinho(squadratinho.x, squadratinho.y) }.toSet()
                     val recentlyExploredNewSquadratinhos = it.recentlyExploredNewSquadratinhosList.map { squadratinho -> Squadratinho(squadratinho.x, squadratinho.y) }.toSet()
+                    val ubersquadratinho = if(it.biggestUbersquadratinhoX != 0 && it.biggestUbersquadratinhoY != 0 && it.biggestUbersquadratinhoSize != 0) Ubersquadratinho(it.biggestUbersquadratinhoX, it.biggestUbersquadratinhoY, it.biggestUbersquadratinhoSize) else null
+                    val yardinho = calcYardinho(exploredSquadratinhos)
 
                     ExploredSquadratsData(
                         // Squadrats
@@ -52,10 +58,13 @@ class ExploreSquadratsService(private val karooSystem: KarooSystemServiceProvide
                         recentlyExploredSquadrats,
                         recentlyExploredNewSquadrats,
                         ubersquadrat,
+                        yard,
 
                         // Squadratinhos
                         exploredSquadratinhos,
                         recentlyExploredNewSquadratinhos,
+                        ubersquadratinho,
+                        yardinho
                     )
                 }
 
@@ -187,6 +196,10 @@ class ExploreSquadratsService(private val karooSystem: KarooSystemServiceProvide
                         val recentlyExploredNewSquadratinhos = if (isNewSquadratinho) recentlyExploredNewSquadratinhosSet + currentSquadratinho else recentlyExploredNewSquadratinhosSet
 
                         val updatedUbersquadrat = Ubersquadrat.getBiggestUbersquadrat(exploredSquadrats)
+                        val updatedUbersquadratinho = Ubersquadratinho.getBiggestUbersquadratinho(exploredSquadratinhos)
+                        val updatedYard = calcYard(exploredSquadrats)
+                        val updatedYardinho = calcYardinho(exploredSquadratinhos)
+
 
                         if (updatedUbersquadrat != null && updatedUbersquadrat!!.size > data.biggestUbersquadratSize) {
                             karooSystem.karooSystemService.dispatch(
@@ -215,6 +228,11 @@ class ExploreSquadratsService(private val karooSystem: KarooSystemServiceProvide
                             .setBiggestUbersquadratX(updatedUbersquadrat?.x ?: 0)
                             .setBiggestUbersquadratY(updatedUbersquadrat?.y ?: 0)
                             .setBiggestUbersquadratSize(updatedUbersquadrat?.size ?: 0)
+                            .setBiggestUbersquadratinhoX(updatedUbersquadratinho?.x ?: 0)
+                            .setBiggestUbersquadratinhoY(updatedUbersquadratinho?.y ?: 0)
+                            .setBiggestUbersquadratinhoSize(updatedUbersquadratinho?.size ?: 0)
+                            .setYard(updatedYard)
+                            .setYardinho(updatedYardinho)
                             .build()
                     }
                 }

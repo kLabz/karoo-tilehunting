@@ -33,4 +33,7 @@ message ExploredSquadrats {
   uint32 biggestUbersquadratinhoX = 14;
   uint32 biggestUbersquadratinhoY = 15;
   uint32 biggestUbersquadratinhoSize = 16;
+
+  uint32 yard = 17;
+  uint32 yardinho = 18;
 }

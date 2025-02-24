@@ -26,22 +26,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
-// import androidx.compose.material3.AlertDialog
-// import androidx.compose.material3.Button
-// import androidx.compose.material3.Card
-// import androidx.compose.material3.CardColors
-// import androidx.compose.material3.ExperimentalMaterial3Api
-// import androidx.compose.material3.FilledTonalButton
-// import androidx.compose.material3.Icon
-// import androidx.compose.material3.LinearProgressIndicator
-// import androidx.compose.material3.MaterialTheme
-// import androidx.compose.material3.OutlinedTextField
-// import androidx.compose.material3.Switch
-// import androidx.compose.material3.TabRow
-// import androidx.compose.material3.Tab
-// import androidx.compose.material3.Text
-// import androidx.compose.material3.TopAppBar
-// import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -64,14 +48,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import bzh.klabz.squadrating.calcYard
 import bzh.klabz.squadrating.R
 import bzh.klabz.squadrating.Squadrat
 import bzh.klabz.squadrating.Squadratinho
 import bzh.klabz.squadrating.datastores.exploredSquadratsDataStore
 import bzh.klabz.squadrating.datastores.userPreferencesDataStore
-import io.hammerhead.karooext.KarooSystemService
-import io.hammerhead.karooext.models.ApplyLauncherBackground
+// import io.hammerhead.karooext.KarooSystemService
 import java.text.DateFormat
 import java.util.Date
 import kotlinx.coroutines.flow.first
@@ -90,7 +72,7 @@ fun MainScreen(onFinish: () -> Unit) {
     // var karooConnected by remember { mutableStateOf(false) }
     val ctx = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val karooSystem = remember { KarooSystemService(ctx) }
+    // val karooSystem = remember { KarooSystemService(ctx) }
 
     val exploredSquadratsStore by ctx.exploredSquadratsDataStore.data.collectAsStateWithLifecycle(null)
     val settingsStore by ctx.userPreferencesDataStore.data.collectAsStateWithLifecycle(null)
@@ -103,6 +85,7 @@ fun MainScreen(onFinish: () -> Unit) {
     var ubersquadratSize by remember { mutableIntStateOf(0) }
     var ubersquadratinhoSize by remember { mutableIntStateOf(0) }
     var yard by remember { mutableIntStateOf(0) }
+    var yardinho by remember { mutableIntStateOf(0) }
     var recentSquadratsCount by remember { mutableIntStateOf(0) }
     var recentNewSquadratsCount by remember { mutableIntStateOf(0) }
     var recentNewSquadratinhosCount by remember { mutableIntStateOf(0) }
@@ -111,9 +94,11 @@ fun MainScreen(onFinish: () -> Unit) {
     // var exitDialogVisible by remember { mutableStateOf(false) }
     var clearedRecentExploredSquadratsDialogVisible by remember { mutableStateOf(false) }
     var squadratLoadRange by remember { mutableStateOf("3") }
-    var hideGrid by remember { mutableStateOf(false) }
-    var isDisabled by remember { mutableStateOf(false) }
-    var showActivityLines by remember { mutableStateOf(false) }
+    var squadratinhoLoadRange by remember { mutableStateOf("3") }
+    var hideSquadratGrid by remember { mutableStateOf(false) }
+    var hideSquadratinhoGrid by remember { mutableStateOf(false) }
+    var areSquadratsDisabled by remember { mutableStateOf(false) }
+    var areSquadratinhosDisabled by remember { mutableStateOf(false) }
 
     var pageIndex by remember { mutableStateOf(0) }
     var squadratsTabIndex by remember { mutableStateOf(0) }
@@ -128,13 +113,14 @@ fun MainScreen(onFinish: () -> Unit) {
             exploredSquadratsCount = exploredSquadrats?.size ?: 0
             exploredSquadratinhosCount = exploredSquadratinhos?.size ?: 0
             recentNewSquadratinhosCount = exploredSquadratsStore?.recentlyExploredNewSquadratinhosCount ?: 0
-            // TODO: probably want to store yard in store, too..
-            yard = if (exploredSquadrats == null) 0 else calcYard(exploredSquadrats)
+            yard = exploredSquadratsStore?.yard ?: 0
+            yardinho = exploredSquadratsStore?.yardinho ?: 0
             ubersquadratSize = exploredSquadratsStore?.biggestUbersquadratSize ?: 0
             ubersquadratinhoSize = exploredSquadratsStore?.biggestUbersquadratinhoSize ?: 0
-            hideGrid = settingsStore?.hideGridLines ?: false
-            isDisabled = settingsStore?.isDisabled ?: false
-            showActivityLines = settingsStore?.showActivityLines ?: false
+            hideSquadratGrid = settingsStore?.hideSquadratGridLines ?: false
+            hideSquadratinhoGrid = settingsStore?.hideSquadratinhoGridLines ?: false
+            areSquadratsDisabled = settingsStore?.areSquadratsDisabled ?: false
+            areSquadratinhosDisabled = settingsStore?.areSquadratinhosDisabled ?: false
         }
     }
 
@@ -142,6 +128,8 @@ fun MainScreen(onFinish: () -> Unit) {
         coroutineScope.launch {
             val squadratDrawRange = settingsStore?.squadratDrawRange?.let { if(it == 0) 3 else it } ?: 3
             squadratLoadRange = "${squadratDrawRange.coerceIn(2..5)}"
+            val squadratinhoDrawRange = settingsStore?.squadratinhoDrawRange?.let { if(it == 0) 3 else it } ?: 3
+            squadratinhoLoadRange = "${squadratinhoDrawRange.coerceIn(2..5)}"
         }
     }
 
@@ -149,13 +137,6 @@ fun MainScreen(onFinish: () -> Unit) {
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
         TopAppBar(
-            // colors = TopAppBarColors(
-            //     containerColor = MaterialTheme.colorScheme.primary,
-            //     scrolledContainerColor = Color.Transparent,
-            //     navigationIconContentColor = Color.Transparent,
-            //     titleContentColor = Color.White,
-            //     actionIconContentColor = Color.Transparent
-            // ),
             title = {
                 Row(modifier = Modifier.padding(0.dp)) {
                     Image(
@@ -300,9 +281,8 @@ fun MainScreen(onFinish: () -> Unit) {
                                         Text(text = "All", fontSize = 10.sp, lineHeight = lineHeight)
                                     }
                                     Column(modifier = Modifier.weight(5f)) {
-                                        Text("0", fontWeight = FontWeight.Bold, lineHeight = lineHeight) // TODO
-                                        // Text("$recentSquadratinhosCount", fontWeight = FontWeight.Bold, lineHeight = lineHeight)
-                                        Text(text = "Recent", fontSize = 10.sp, lineHeight = lineHeight)
+                                    //     Text("$recentSquadratinhosCount", fontWeight = FontWeight.Bold, lineHeight = lineHeight)
+                                    //     Text(text = "Recent", fontSize = 10.sp, lineHeight = lineHeight)
                                     }
                                     Column(modifier = Modifier.weight(5f)) {
                                         Text(text = "$recentNewSquadratinhosCount", fontWeight = FontWeight.Bold, lineHeight = lineHeight)
@@ -321,8 +301,7 @@ fun MainScreen(onFinish: () -> Unit) {
                                     }
                                     spacer()
                                     Column(modifier = Modifier.weight(18f)) {
-                                        Text(text = "0", fontWeight = FontWeight.Bold, lineHeight = lineHeight) // TODO
-                                        // Text(text = "$yardinho", fontWeight = FontWeight.Bold, lineHeight = lineHeight)
+                                        Text(text = "$yardinho", fontWeight = FontWeight.Bold, lineHeight = lineHeight)
                                         Text(text = "Yardinho", fontSize = 10.sp, lineHeight = lineHeight)
                                     }
                                     spacer()
@@ -355,15 +334,20 @@ fun MainScreen(onFinish: () -> Unit) {
 
                     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                         if (exploredSquadratsStore?.isDownloading == true){
-                            Text("Loaded ${exploredSquadratsStore?.downloadedActivities ?: 0} activities...")
-                            LinearProgressIndicator()
+                            Column() {
+                                Text("Downloaded ${exploredSquadratsStore?.downloadedActivities ?: 0} activities...", fontSize = 14.sp)
+                                LinearProgressIndicator()
+                            }
                         } else {
                             val lastDownloadedAtTimestamp = exploredSquadratsStore?.lastDownloadedAt ?: 0
                             val lastDownloadedAt = DateFormat.getDateTimeInstance().format(Date(lastDownloadedAtTimestamp))
 
                             if (!exploredSquadratsStore?.lastDownloadError.isNullOrBlank()){
                                 val atString = if (lastDownloadedAtTimestamp > 0) " at $lastDownloadedAt" else ""
-                                Text("Error downloading activities: ${exploredSquadratsStore?.lastDownloadError}${atString}.")
+                                Text(
+                                    text = "Error downloading activities: ${exploredSquadratsStore?.lastDownloadError}${atString}.",
+                                    fontSize = 12.sp
+                                )
                             } else if ((exploredSquadratsStore?.downloadedActivities ?: 0) > 0 && lastDownloadedAtTimestamp > 0) {
                                 Column() {
                                     Text(text = "$downloadedActivities Activities", lineHeight = 0.2.sp)
@@ -401,6 +385,8 @@ fun MainScreen(onFinish: () -> Unit) {
                                         .setBiggestUbersquadratinhoX(0)
                                         .setBiggestUbersquadratinhoY(0)
                                         .setBiggestUbersquadratinhoSize(0)
+                                        .setYard(0)
+                                        .setYardinho(0)
                                         .build()
                                     }
                                 }
@@ -413,12 +399,14 @@ fun MainScreen(onFinish: () -> Unit) {
                             Spacer(modifier = Modifier.width(5.dp))
                         }
 
-                        FilledTonalButton(modifier = connectModifier,onClick = {
-                            statshuntersDialogVisible = true
-                        }) {
-                            Icon(Icons.Default.Person, contentDescription = "Connect StatsHunters")
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = "Connect", fontSize = 12.sp, lineHeight = 0.6.sp)
+                        if (exploredSquadratsStore?.isDownloading != true){
+                            FilledTonalButton(modifier = connectModifier, onClick = {
+                                statshuntersDialogVisible = true
+                            }) {
+                                Icon(Icons.Default.Person, contentDescription = "Connect StatsHunters")
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(text = "Connect", fontSize = 12.sp, lineHeight = 0.6.sp)
+                            }
                         }
                     }
 
@@ -446,15 +434,13 @@ fun MainScreen(onFinish: () -> Unit) {
                 // Settings
                 // ===================================================
                 1 -> {
-                    // TODO: same for squadratinhos
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Switch(checked = !isDisabled, onCheckedChange = { isDisabled = !it})
+                        Switch(checked = !areSquadratsDisabled, onCheckedChange = { areSquadratsDisabled = !it})
                         Spacer(modifier = Modifier.width(10.dp))
                         Text("Enable squadrat drawing")
                     }
 
-                    if (!isDisabled){
-                        // TODO: same for squadratinhos
+                    if (!areSquadratsDisabled) {
                         apply {
                             val dropdownOptions = SquadratDrawRangeEnum.entries.toList().map { unit -> DropdownOption("${unit.radius}", "${unit.radius}") }
                             val dropdownInitialSelection by remember(squadratLoadRange) {
@@ -465,18 +451,36 @@ fun MainScreen(onFinish: () -> Unit) {
                             }
                         }
 
-                        // TODO: always ON? (only for squadrats, maybe)
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Switch(checked = !hideGrid, onCheckedChange = { hideGrid = !it})
+                            Switch(checked = !hideSquadratGrid, onCheckedChange = { hideSquadratGrid = !it})
                             Spacer(modifier = Modifier.width(10.dp))
-                            Text("Show grid")
+                            Text("Show squadrat grid")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Switch(checked = !areSquadratinhosDisabled, onCheckedChange = { areSquadratinhosDisabled = !it})
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text("Enable squadratinho drawing")
+                    }
+
+                    if (!areSquadratinhosDisabled) {
+                        apply {
+                            val dropdownOptions = SquadratDrawRangeEnum.entries.toList().map { unit -> DropdownOption("${unit.radius}", "${unit.radius}") }
+                            val dropdownInitialSelection by remember(squadratinhoLoadRange) {
+                                mutableStateOf(dropdownOptions.find { option -> option.id == squadratinhoLoadRange } ?: dropdownOptions[0])
+                            }
+                            Dropdown(label = "Squadratinho Draw Range", options = dropdownOptions, selected = dropdownInitialSelection) { selectedOption ->
+                                squadratinhoLoadRange = selectedOption.id
+                            }
                         }
 
-                        // TODO: remove this feature?
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Switch(checked = showActivityLines, onCheckedChange = { showActivityLines = it})
+                            Switch(checked = !hideSquadratinhoGrid, onCheckedChange = { hideSquadratinhoGrid = !it})
                             Spacer(modifier = Modifier.width(10.dp))
-                            Text("Show activity lines")
+                            Text("Show squadratinho grid")
                         }
                     }
                 }
@@ -547,9 +551,12 @@ fun MainScreen(onFinish: () -> Unit) {
                         ctx.userPreferencesDataStore.updateData { preferences ->
                             preferences.toBuilder()
                                 .setSquadratDrawRange(squadratLoadRange.toInt())
-                                .setHideGridLines(hideGrid)
-                                .setIsDisabled(isDisabled)
-                                .setShowActivityLines(showActivityLines)
+                                .setSquadratinhoDrawRange(squadratinhoLoadRange.toInt())
+                                .setHideSquadratGridLines(hideSquadratGrid)
+                                .setHideSquadratinhoGridLines(hideSquadratinhoGrid)
+                                .setAreSquadratsDisabled(areSquadratsDisabled)
+                                .setAreSquadratinhosDisabled(areSquadratinhosDisabled)
+                                // .setShowActivityLines(showActivityLines)
                                 .build()
                         }
                         savedDialogVisible = true
@@ -658,6 +665,8 @@ fun MainScreen(onFinish: () -> Unit) {
                                                 .setBiggestUbersquadratinhoX(0)
                                                 .setBiggestUbersquadratinhoY(0)
                                                 .setBiggestUbersquadratinhoSize(0)
+                                                .setYard(0)
+                                                .setYardinho(0)
                                                 .build()
                                         }
                                     }

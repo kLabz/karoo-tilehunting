@@ -2,6 +2,8 @@ package bzh.klabz.squadrating
 
 import android.content.Context
 import android.util.Log
+import bzh.klabz.squadrating.calcYard
+import bzh.klabz.squadrating.calcYardinho
 import bzh.klabz.squadrating.datastores.exploredSquadratsDataStore
 import bzh.klabz.squadrating.datatypes.DualAllTimeDataType
 import bzh.klabz.squadrating.datatypes.DualRecentDataType
@@ -65,14 +67,14 @@ class SquadratingExtension : KarooExtension("squadrating", "1.0-beta6") {
         val recentlyExploredSquadrats: Set<Squadrat>,
         val recentlyExploredNewSquadrats: Set<Squadrat>,
         val ubersquadrat: Ubersquadrat?,
-        // TODO: val yard: Int, (with area?)
+        val yard: Int, // TODO: with area?
 
         // Squadratinhos
         val exploredSquadratinhos: Set<Squadratinho>,
         // TODO: val recentlyExploredSquadratinhos: Set<Squadratinho>, (?)
         val recentlyExploredNewSquadratinhos: Set<Squadratinho>,
-        // TODO: val ubersquadratinho: Ubersquadratinho?,
-        // TODO: val yardinho: Int (with area?)
+        val ubersquadratinho: Ubersquadratinho?,
+        val yardinho: Int, // TODO: with area?
     )
 
     override fun startMap(emitter: Emitter<MapEffect>) {
@@ -90,9 +92,18 @@ class SquadratingExtension : KarooExtension("squadrating", "1.0-beta6") {
         )
     }
 
-    private val exploredSquadratsField by lazy {
+    private val newSquadratinhosField by lazy {
         DeveloperField(
             fieldDefinitionNumber = 1,
+            fitBaseTypeId = 132, // FitBaseType.UInt16
+            fieldName = "New squadratinhos",
+            units = "squadratinhos",
+        )
+    }
+
+    private val exploredSquadratsField by lazy {
+        DeveloperField(
+            fieldDefinitionNumber = 2,
             fitBaseTypeId = 132, // FitBaseType.UInt16
             fieldName = "Explored squadrats",
             units = "squadrats",
@@ -101,10 +112,19 @@ class SquadratingExtension : KarooExtension("squadrating", "1.0-beta6") {
 
     private val ubersquadratSizeField by lazy {
         DeveloperField(
-            fieldDefinitionNumber = 2,
+            fieldDefinitionNumber = 3,
             fitBaseTypeId = 131, // FitBaseType.UInt8
             fieldName = "Ubersquadrat size",
             units = "squadrats",
+        )
+    }
+
+    private val ubersquadratinhoSizeField by lazy {
+        DeveloperField(
+            fieldDefinitionNumber = 4,
+            fitBaseTypeId = 131, // FitBaseType.UInt8
+            fieldName = "Ubersquadratinho size",
+            units = "squadratinhos",
         )
     }
 
@@ -118,10 +138,13 @@ class SquadratingExtension : KarooExtension("squadrating", "1.0-beta6") {
                     val recentlyExploredSquadrats = it.recentlyExploredSquadratsList.map { squadrat -> Squadrat(squadrat.x, squadrat.y) }.toSet()
                     val recentlyExploredNewSquadrats = it.recentlyExploredNewSquadratsList.map { squadrat -> Squadrat(squadrat.x, squadrat.y) }.toSet()
                     val ubersquadrat = if(it.biggestUbersquadratX != 0 && it.biggestUbersquadratY != 0 && it.biggestUbersquadratSize != 0) Ubersquadrat(it.biggestUbersquadratX, it.biggestUbersquadratY, it.biggestUbersquadratSize) else null
+                    val yard = calcYard(exploredSquadrats)
 
                     // Squadratinhos
                     val exploredSquadratinhos = it.exploredSquadratinhosList.map { squadratinho -> Squadratinho(squadratinho.x, squadratinho.y) }.toSet()
                     val recentlyExploredNewSquadratinhos = it.recentlyExploredNewSquadratinhosList.map { squadratinho -> Squadratinho(squadratinho.x, squadratinho.y) }.toSet()
+                    val ubersquadratinho = if(it.biggestUbersquadratinhoX != 0 && it.biggestUbersquadratinhoY != 0 && it.biggestUbersquadratinhoSize != 0) Ubersquadratinho(it.biggestUbersquadratinhoX, it.biggestUbersquadratinhoY, it.biggestUbersquadratinhoSize) else null
+                    val yardinho = calcYardinho(exploredSquadratinhos)
 
                     ExploredSquadratsData(
                         // Squadrats
@@ -129,22 +152,30 @@ class SquadratingExtension : KarooExtension("squadrating", "1.0-beta6") {
                         recentlyExploredSquadrats,
                         recentlyExploredNewSquadrats,
                         ubersquadrat,
+                        yard,
+
                         // Squadratinhos
                         exploredSquadratinhos,
                         recentlyExploredNewSquadratinhos,
+                        ubersquadratinho,
+                        yardinho
                     )
                 }
 
             var lastSquadratsCount:UShort = 0u;
             var lastNewSquadratsCount:UShort = 0u;
+            var lastNewSquadratinhosCount:UShort = 0u;
             var lastUbersquadratSize:UByte = 0u;
+            var lastUbersquadratinhoSize:UByte = 0u;
 
             combine(exploredSquadratsFlow, rideStateFlow) { exploredSquadrats, rideState -> Pair(exploredSquadrats, rideState) }
                 .filter { (exploredSquadrats, rideState) ->
                     !(rideState is RideState.Idle) && (
                         (lastSquadratsCount != exploredSquadrats.recentlyExploredSquadrats.size.toUShort())
                         || (lastNewSquadratsCount != exploredSquadrats.recentlyExploredNewSquadrats.size.toUShort())
+                        || (lastNewSquadratinhosCount != exploredSquadrats.recentlyExploredNewSquadratinhos.size.toUShort())
                         || (lastUbersquadratSize != exploredSquadrats.ubersquadrat?.size?.toUByte() ?: 0u)
+                        || (lastUbersquadratinhoSize != exploredSquadrats.ubersquadratinho?.size?.toUByte() ?: 0u)
                     )
                 }
                 .collect { (exploredSquadrats, rideState) ->
@@ -164,6 +195,14 @@ class SquadratingExtension : KarooExtension("squadrating", "1.0-beta6") {
                     }
                     if (rideState is RideState.Paused) emitter.onNext(WriteToSessionMesg(FieldValue(exploredSquadratsField, lastSquadratsCount.toDouble())))
 
+                    var lastNewSquadratinhosCount_ = exploredSquadrats.recentlyExploredNewSquadratinhos.size.toUShort()
+                    if (lastNewSquadratinhosCount != lastNewSquadratinhosCount_) {
+                        Log.i(TAG, "Writing new squadratinhos count: ${lastNewSquadratinhosCount_}")
+                        lastNewSquadratinhosCount = lastNewSquadratinhosCount_
+                        emitter.onNext(WriteToRecordMesg(FieldValue(newSquadratinhosField, lastNewSquadratinhosCount.toDouble())))
+                    }
+                    if (rideState is RideState.Paused) emitter.onNext(WriteToSessionMesg(FieldValue(exploredSquadratsField, lastSquadratsCount.toDouble())))
+
                     var lastUbersquadratSize_ = exploredSquadrats.ubersquadrat?.size?.toUByte() ?: 0u
                     if (lastUbersquadratSize != lastUbersquadratSize_) {
                         Log.i(TAG, "Writing new ubersquadrat size: ${lastUbersquadratSize_}")
@@ -171,6 +210,14 @@ class SquadratingExtension : KarooExtension("squadrating", "1.0-beta6") {
                         emitter.onNext(WriteToRecordMesg(FieldValue(ubersquadratSizeField, lastUbersquadratSize.toDouble())))
                     }
                     if (rideState is RideState.Paused) emitter.onNext(WriteToSessionMesg(FieldValue(ubersquadratSizeField, lastUbersquadratSize.toDouble())))
+
+                    var lastUbersquadratinhoSize_ = exploredSquadrats.ubersquadratinho?.size?.toUByte() ?: 0u
+                    if (lastUbersquadratinhoSize != lastUbersquadratinhoSize_) {
+                        Log.i(TAG, "Writing new ubersquadratinho size: ${lastUbersquadratinhoSize_}")
+                        lastUbersquadratinhoSize = lastUbersquadratinhoSize_
+                        emitter.onNext(WriteToRecordMesg(FieldValue(ubersquadratSizeField, lastUbersquadratinhoSize.toDouble())))
+                    }
+                    if (rideState is RideState.Paused) emitter.onNext(WriteToSessionMesg(FieldValue(ubersquadratinhoSizeField, lastUbersquadratinhoSize.toDouble())))
                 }
         }
 

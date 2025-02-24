@@ -9,6 +9,8 @@ import bzh.klabz.squadrating.Ubersquadrat
 import bzh.klabz.squadrating.Ubersquadratinho
 import bzh.klabz.squadrating.coordsToSquadrat
 import bzh.klabz.squadrating.coordsToSquadratinho
+import bzh.klabz.squadrating.calcYard
+import bzh.klabz.squadrating.calcYardinho
 import bzh.klabz.squadrating.data.Activity
 import bzh.klabz.squadrating.datastores.activityLinesDataStore
 import bzh.klabz.squadrating.datastores.exploredSquadratsDataStore
@@ -122,6 +124,11 @@ class StatshuntersDownloadService(private val applicationContext: Context, val s
                                 val updatedUbersquadratinho = Ubersquadratinho.getBiggestUbersquadratinho(updatedExploredSquadratinhos)
                                 Log.d(TAG, "New ubersquadratinho: $updatedUbersquadratinho")
 
+                                val updatedYard = calcYard(updatedExploredSquadrats)
+                                Log.d(TAG, "New yard: $updatedYard")
+                                val updatedYardinho = calcYardinho(updatedExploredSquadratinhos)
+                                Log.d(TAG, "New yardinho: $updatedYardinho")
+
                                 exploredSquadrats.toBuilder()
                                     .setDownloadedActivities(activityCount)
                                     .clearExploredSquadrats()
@@ -134,6 +141,8 @@ class StatshuntersDownloadService(private val applicationContext: Context, val s
                                     .setBiggestUbersquadratinhoX(updatedUbersquadratinho?.x ?: 0)
                                     .setBiggestUbersquadratinhoY(updatedUbersquadratinho?.y ?: 0)
                                     .setBiggestUbersquadratinhoSize(updatedUbersquadratinho?.size ?: 0)
+                                    .setYard(updatedYard)
+                                    .setYardinho(updatedYardinho)
                                     .build()
                             }
 

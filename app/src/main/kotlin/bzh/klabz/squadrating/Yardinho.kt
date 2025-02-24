@@ -27,7 +27,7 @@ open class YardinhoCluster {
     }
 }
 
-fun calcYard(squadratinhos: Set<Squadratinho>): Int {
+fun calcYardinho(squadratinhos: Set<Squadratinho>): Int {
     val clusters = mutableListOf<YardinhoCluster>()
     val remainingSquadratinhos = squadratinhos.toMutableSet()
 
