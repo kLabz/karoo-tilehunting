@@ -8,6 +8,5 @@ message UserPreferences {
   bool hideSquadratGridLines = 4;
   bool areSquadratsDisabled = 5;
   uint32 squadratinhoDrawRange = 6;
-  bool hideSquadratinhoGridLines = 7;
-  bool areSquadratinhosDisabled = 8;
+  bool areSquadratinhosDisabled = 7;
 }

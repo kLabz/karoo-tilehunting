@@ -53,7 +53,6 @@ import bzh.klabz.squadrating.Squadrat
 import bzh.klabz.squadrating.Squadratinho
 import bzh.klabz.squadrating.datastores.exploredSquadratsDataStore
 import bzh.klabz.squadrating.datastores.userPreferencesDataStore
-// import io.hammerhead.karooext.KarooSystemService
 import java.text.DateFormat
 import java.util.Date
 import kotlinx.coroutines.flow.first
@@ -69,10 +68,8 @@ enum class SquadratDrawRangeEnum(val radius: Int){
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(onFinish: () -> Unit) {
-    // var karooConnected by remember { mutableStateOf(false) }
     val ctx = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    // val karooSystem = remember { KarooSystemService(ctx) }
 
     val exploredSquadratsStore by ctx.exploredSquadratsDataStore.data.collectAsStateWithLifecycle(null)
     val settingsStore by ctx.userPreferencesDataStore.data.collectAsStateWithLifecycle(null)
@@ -91,12 +88,10 @@ fun MainScreen(onFinish: () -> Unit) {
     var recentNewSquadratinhosCount by remember { mutableIntStateOf(0) }
 
     var savedDialogVisible by remember { mutableStateOf(false) }
-    // var exitDialogVisible by remember { mutableStateOf(false) }
     var clearedRecentExploredSquadratsDialogVisible by remember { mutableStateOf(false) }
     var squadratLoadRange by remember { mutableStateOf("3") }
     var squadratinhoLoadRange by remember { mutableStateOf("3") }
     var hideSquadratGrid by remember { mutableStateOf(false) }
-    var hideSquadratinhoGrid by remember { mutableStateOf(false) }
     var areSquadratsDisabled by remember { mutableStateOf(false) }
     var areSquadratinhosDisabled by remember { mutableStateOf(false) }
 
@@ -118,7 +113,6 @@ fun MainScreen(onFinish: () -> Unit) {
             ubersquadratSize = exploredSquadratsStore?.biggestUbersquadratSize ?: 0
             ubersquadratinhoSize = exploredSquadratsStore?.biggestUbersquadratinhoSize ?: 0
             hideSquadratGrid = settingsStore?.hideSquadratGridLines ?: false
-            hideSquadratinhoGrid = settingsStore?.hideSquadratinhoGridLines ?: false
             areSquadratsDisabled = settingsStore?.areSquadratsDisabled ?: false
             areSquadratinhosDisabled = settingsStore?.areSquadratinhosDisabled ?: false
         }
@@ -458,12 +452,10 @@ fun MainScreen(onFinish: () -> Unit) {
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
-
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Switch(checked = !areSquadratinhosDisabled, onCheckedChange = { areSquadratinhosDisabled = !it})
                         Spacer(modifier = Modifier.width(10.dp))
-                        Text("Enable squadratinho drawing")
+                        Text("Draw missing/new squadratinhos")
                     }
 
                     if (!areSquadratinhosDisabled) {
@@ -475,12 +467,6 @@ fun MainScreen(onFinish: () -> Unit) {
                             Dropdown(label = "Squadratinho Draw Range", options = dropdownOptions, selected = dropdownInitialSelection) { selectedOption ->
                                 squadratinhoLoadRange = selectedOption.id
                             }
-                        }
-
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Switch(checked = !hideSquadratinhoGrid, onCheckedChange = { hideSquadratinhoGrid = !it})
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text("Show squadratinho grid")
                         }
                     }
                 }
@@ -553,10 +539,8 @@ fun MainScreen(onFinish: () -> Unit) {
                                 .setSquadratDrawRange(squadratLoadRange.toInt())
                                 .setSquadratinhoDrawRange(squadratinhoLoadRange.toInt())
                                 .setHideSquadratGridLines(hideSquadratGrid)
-                                .setHideSquadratinhoGridLines(hideSquadratinhoGrid)
                                 .setAreSquadratsDisabled(areSquadratsDisabled)
                                 .setAreSquadratinhosDisabled(areSquadratinhosDisabled)
-                                // .setShowActivityLines(showActivityLines)
                                 .build()
                         }
                         savedDialogVisible = true
