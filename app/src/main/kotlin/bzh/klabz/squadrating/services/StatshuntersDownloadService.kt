@@ -16,6 +16,7 @@ import bzh.klabz.squadrating.datastores.activityLinesDataStore
 import bzh.klabz.squadrating.datastores.exploredSquadratsDataStore
 import bzh.klabz.squadrating.datastores.userPreferencesDataStore
 import bzh.klabz.squadrating.squadratCenter
+import bzh.klabz.squadrating.squadratinhoCenter
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
@@ -99,6 +100,19 @@ class StatshuntersDownloadService(private val applicationContext: Context, val s
         for (r in 1..(lineSquadrats.size - 1)) {
             val p1 = lineSquadrats[r-1];
             val p2 = lineSquadrats[r]
+            if (p1.hasCommonCorners(p2)) ret.add(Pair(r - 1, r))
+        }
+
+        return ret
+    }
+
+    fun cornerPasses1(lineSquadratinhos:List<Squadratinho>):List<Pair<Int, Int>> {
+        val ret:MutableList<Pair<Int, Int>> = mutableListOf()
+        if (lineSquadratinhos.size < 2) return ret
+
+        for (r in 1..(lineSquadratinhos.size - 1)) {
+            val p1 = lineSquadratinhos[r-1];
+            val p2 = lineSquadratinhos[r]
             if (p1.hasCommonCorners(p2)) ret.add(Pair(r - 1, r))
         }
 
@@ -223,6 +237,111 @@ class StatshuntersDownloadService(private val applicationContext: Context, val s
         return i
     }
 
+    fun findMissingSquadratinho(s1:Squadratinho, s2:Squadratinho, p1:Point, p2:Point):Squadratinho? {
+        var i:Squadratinho? = null
+        var u = false
+        var d = false
+        var h = false
+        val c = if (s1.y > s2.y) s2 else s1
+        val f = if (s1.y > s2.y) s1 else s2
+        val q = if (s1.y > s2.y) p1 else p2
+        val l = if (s1.y > s2.y) p2 else p1
+
+        var y = squadratinhoCenter(c)
+        var S = squadratinhoCenter(f)
+
+        // Note: squadratinho only part
+        val t = coordsToSquadrat(y.first, y.second)
+        val n = coordsToSquadrat(S.first, S.second)
+        if (t.x != n.x && t.y != n.y) {
+            y = squadratCenter(t)
+            S = squadratCenter(n)
+        }
+
+        val x = intersect(y, S, Pair(l.latitude(), l.longitude()), Pair(q.latitude(), q.longitude()))
+        if (x != null) {
+            val t = coordsToSquadratinho(x.first, x.second)
+            if (t.equals(Squadratinho(c.x, c.y))) u = true
+            else if (t.equals(Squadratinho(f.x, f.y))) d = true
+        }
+
+        val p = det(squadratinhoCenter(c), squadratinhoCenter(f), Pair(l.latitude(), l.longitude()))
+        val C = det(squadratinhoCenter(c), squadratinhoCenter(f), Pair(q.latitude(), q.longitude()))
+
+        if (!u && !d || (p > 0 && C > 0 || p < 0 && C < 0)) {
+            if (c.x < f.x) {
+                if (p > 0 || C > 0) {
+                    i = Squadratinho(f.x, c.y)
+                } else {
+                    if (p < 0 || C < 0) {
+                        i = Squadratinho(c.x, f.y)
+                    } else {
+                        h = true
+                    }
+                }
+            } else {
+                if (p > 0 || C > 0) {
+                    i = Squadratinho(c.x, f.y)
+                } else {
+                    if (p < 0 || C < 0) {
+                        i = Squadratinho(f.x, c.y)
+                    } else {
+                        h = true
+                    }
+                }
+            }
+        } else {
+            if (u) {
+                if (c.x < f.x) {
+                    if (p > 0 || C < 0) {
+                        i = Squadratinho(c.x, f.y)
+                    } else {
+                        if (p < 0 || C > 0) {
+                            i = Squadratinho(f.x, c.y)
+                        } else {
+                            h = true
+                        }
+                    }
+                } else {
+                    if (p > 0 || C < 0) {
+                        i = Squadratinho(f.x, c.y)
+                    } else {
+                        if (p < 0 || C > 0) {
+                            i = Squadratinho(c.x, f.y)
+                        } else {
+                            h = true
+                        }
+                    }
+                }
+            } else {
+                if (d && (c.x < f.x)) {
+                    if (p > 0 || C < 0) {
+                        i = Squadratinho(f.x, c.y)
+                    } else {
+                        if (p < 0 || C > 0) {
+                            i = Squadratinho(c.x, f.y)
+                        } else {
+                            h = true
+                        }
+                    }
+                } else {
+                    if (p > 0 || C < 0) {
+                        i = Squadratinho(c.x, f.y)
+                    } else {
+                        if (p < 0 || C > 0) {
+                            i = Squadratinho(f.x, c.y)
+                        } else {
+                            h = true
+                        }
+                    }
+                }
+            }
+        }
+
+        if (h) return Squadratinho(c.x, f.y)
+        return i
+    }
+
     fun findMissingSquadrats(points:List<Point>, lineSquadrats:List<Squadrat>):Set<Squadrat> {
         val ret:MutableSet<Squadrat> = mutableSetOf()
         val cornerPasses = cornerPasses(lineSquadrats)
@@ -237,24 +356,35 @@ class StatshuntersDownloadService(private val applicationContext: Context, val s
         return ret
     }
 
+    fun findMissingSquadratinhos(points:List<Point>, lineSquadratinhos:List<Squadratinho>):Set<Squadratinho> {
+        val ret:MutableSet<Squadratinho> = mutableSetOf()
+        val cornerPasses = cornerPasses1(lineSquadratinhos)
+        for ((s1, s2) in cornerPasses) {
+            val o = lineSquadratinhos[s1]
+            val e = lineSquadratinhos[s2]
+            val i = points[s1]
+            val u = points[s2]
+            val missingSquadratinho = findMissingSquadratinho(o, e, i, u)
+            if (missingSquadratinho != null) ret.add(missingSquadratinho)
+        }
+        return ret
+    }
+
     fun processLine(line:String, newSquadrats:MutableSet<Squadrat>, newSquadratinhos:MutableSet<Squadratinho>, precision:Int) {
-        var points /* r */ = PolylineUtils.decode(line, precision).toMutableList()
-        val lineSquadrats /* a */ = points.map { coordsToSquadrat(it.latitude(), it.longitude()) }.toMutableList()
+        var points = PolylineUtils.decode(line, precision).toMutableList()
+        val lineSquadrats = points.map { coordsToSquadrat(it.latitude(), it.longitude()) }.toMutableList()
         fillSummaryPolyline(points, lineSquadrats)
         for (squadrat in lineSquadrats) if (!newSquadrats.contains(squadrat)) newSquadrats.add(squadrat)
 
         val missingSquadrats = findMissingSquadrats(points, lineSquadrats)
         for (squadrat in missingSquadrats) if (!newSquadrats.contains(squadrat)) newSquadrats.add(squadrat)
 
-        // TODO: factorize squadratinho handling
-
-        points /* r */ = PolylineUtils.decode(line, precision).toMutableList()
-        val lineSquadratinhos /* a */ = points.map { coordsToSquadratinho(it.latitude(), it.longitude()) }.toMutableList()
+        points = PolylineUtils.decode(line, precision).toMutableList()
+        val lineSquadratinhos = points.map { coordsToSquadratinho(it.latitude(), it.longitude()) }.toMutableList()
         fillSummaryPolyline1(points, lineSquadratinhos)
         for (squadratinho in lineSquadratinhos) if (!newSquadratinhos.contains(squadratinho)) newSquadratinhos.add(squadratinho)
-        // TODO
-        // val missingSquadratinhos = findMissingSquadratinhos(points, lineSquadratinhos)
-        // for (squadratinho in missingSquadratinhos) if (!newSquadratinhos.contains(squadratinho)) newSquadratinhos.add(squadratinho)
+        val missingSquadratinhos = findMissingSquadratinhos(points, lineSquadratinhos)
+        for (squadratinho in missingSquadratinhos) if (!newSquadratinhos.contains(squadratinho)) newSquadratinhos.add(squadratinho)
     }
 
     fun startJob(): Job {
@@ -302,7 +432,7 @@ class StatshuntersDownloadService(private val applicationContext: Context, val s
                                 val newSquadrats:MutableSet<Squadrat> = mutableSetOf()
                                 val newSquadratinhos:MutableSet<Squadratinho> = mutableSetOf()
                                 if (!hasLines) {
-                                    // Fallback to statshunters tiles, even if precision isn't optimal by default
+                                    // Fallback to statshunters tiles, but then there will be no squadratinho support
                                     activities.forEach {
                                         it.tiles.forEach {
                                             val squadrat = Squadrat(it.x, it.y)

@@ -56,3 +56,18 @@ fun coordsToSquadratinho(lat: Double, lon: Double): Squadratinho {
     val ySquadratinho = ((1.0 - ln(tan(latRad) + 1.0 / cos(latRad)) / Math.PI) / 2.0 * n).toInt()
     return Squadratinho(xSquadratinho, ySquadratinho)
 }
+
+fun squadratinhoToCoords(squadratinho:Squadratinho):Pair<Double, Double> {
+    val zoom = SQUADRATINHO_ZOOM
+    val lat = squadratinho.x / 2.0.pow(zoom) * 360 - 180
+    val r = Math.PI - 2 * Math.PI * squadratinho.y / 2.0.pow(zoom)
+    val lon = 180 / Math.PI * Math.atan(0.5 * (Math.exp(r) - Math.exp( - r)))
+    return Pair(lat, lon)
+}
+
+fun squadratinhoCenter(squadratinho:Squadratinho):Pair<Double, Double> {
+    val (x, y) = squadratinhoToCoords(squadratinho)
+    val (nextX,_) = squadratinhoToCoords(Squadratinho(squadratinho.x + 1, squadratinho.y))
+    val (_,nextY) = squadratinhoToCoords(Squadratinho(squadratinho.x, squadratinho.y + 1))
+    return Pair(x + Math.abs(nextX - x) / 2, y - Math.abs(nextY - y) / 2)
+}

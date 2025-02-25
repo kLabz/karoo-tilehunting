@@ -75,6 +75,13 @@ data class Squadratinho(val x: Int, val y: Int) {
                 squadratinhos.contains(Squadratinho(x, y - 1))
     }
 
+    fun hasCommonCorners(squadratinho:Squadratinho):Boolean {
+        return (this.x == squadratinho.x + 1 && this.y == squadratinho.y + 1) ||
+            (this.x == squadratinho.x - 1 && this.y == squadratinho.y - 1) ||
+            (this.x == squadratinho.x - 1 && this.y == squadratinho.y + 1) ||
+            (this.x == squadratinho.x + 1 && this.y == squadratinho.y - 1)
+    }
+
     fun equals(s:Squadratinho):Boolean {
         return this.x == s.x && this.y == s.y
     }

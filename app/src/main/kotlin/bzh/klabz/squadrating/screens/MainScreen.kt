@@ -62,9 +62,7 @@ enum class SquadratDrawRangeEnum(val radius: Int){
     LOAD_2(2),
     LOAD_3(3),
     LOAD_4(4),
-    LOAD_5(5),
-    LOAD_9(9),
-    LOAD_15(15)
+    LOAD_5(5)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -123,7 +121,7 @@ fun MainScreen(onFinish: () -> Unit) {
     LaunchedEffect(settingsStore){
         coroutineScope.launch {
             val squadratDrawRange = settingsStore?.squadratDrawRange?.let { if(it == 0) 3 else it } ?: 3
-            squadratLoadRange = "${squadratDrawRange.coerceIn(2..15)}"
+            squadratLoadRange = "${squadratDrawRange.coerceIn(2..5)}"
             val squadratinhoDrawRange = settingsStore?.squadratinhoDrawRange?.let { if(it == 0) 3 else it } ?: 3
             squadratinhoLoadRange = "${squadratinhoDrawRange.coerceIn(2..5)}"
         }
