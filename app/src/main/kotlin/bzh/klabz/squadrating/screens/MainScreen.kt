@@ -91,7 +91,6 @@ fun MainScreen(onFinish: () -> Unit) {
     var savedDialogVisible by remember { mutableStateOf(false) }
     var clearedRecentExploredSquadratsDialogVisible by remember { mutableStateOf(false) }
     var squadratLoadRange by remember { mutableStateOf("3") }
-    var squadratinhoLoadRange by remember { mutableStateOf("3") }
     var hideSquadratGrid by remember { mutableStateOf(false) }
     var areSquadratsDisabled by remember { mutableStateOf(false) }
     var areSquadratinhosDisabled by remember { mutableStateOf(false) }
@@ -123,8 +122,6 @@ fun MainScreen(onFinish: () -> Unit) {
         coroutineScope.launch {
             val squadratDrawRange = settingsStore?.squadratDrawRange?.let { if(it == 0) 3 else it } ?: 3
             squadratLoadRange = "${squadratDrawRange.coerceIn(2..5)}"
-            val squadratinhoDrawRange = settingsStore?.squadratinhoDrawRange?.let { if(it == 0) 3 else it } ?: 3
-            squadratinhoLoadRange = "${squadratinhoDrawRange.coerceIn(2..5)}"
         }
     }
 
@@ -486,18 +483,6 @@ fun MainScreen(onFinish: () -> Unit) {
                         Spacer(modifier = Modifier.width(10.dp))
                         Text("Draw missing/new squadratinhos")
                     }
-
-                    if (!areSquadratinhosDisabled) {
-                        apply {
-                            val dropdownOptions = SquadratDrawRangeEnum.entries.toList().map { unit -> DropdownOption("${unit.radius}", "${unit.radius}") }
-                            val dropdownInitialSelection by remember(squadratinhoLoadRange) {
-                                mutableStateOf(dropdownOptions.find { option -> option.id == squadratinhoLoadRange } ?: dropdownOptions[0])
-                            }
-                            Dropdown(label = "Squadratinho Draw Range", options = dropdownOptions, selected = dropdownInitialSelection) { selectedOption ->
-                                squadratinhoLoadRange = selectedOption.id
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -566,7 +551,6 @@ fun MainScreen(onFinish: () -> Unit) {
                         ctx.userPreferencesDataStore.updateData { preferences ->
                             preferences.toBuilder()
                                 .setSquadratDrawRange(squadratLoadRange.toInt())
-                                .setSquadratinhoDrawRange(squadratinhoLoadRange.toInt())
                                 .setHideSquadratGridLines(hideSquadratGrid)
                                 .setAreSquadratsDisabled(areSquadratsDisabled)
                                 .setAreSquadratinhosDisabled(areSquadratinhosDisabled)
