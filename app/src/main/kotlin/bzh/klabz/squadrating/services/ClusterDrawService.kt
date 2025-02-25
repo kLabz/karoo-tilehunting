@@ -120,7 +120,7 @@ class ClusterDrawService(private val karooSystem: KarooSystemServiceProvider,
 
                         Log.d(TAG, "Start updating squadrats")
 
-                        val squadratLoadRadius = settings.squadratDrawRange.let { if(it > 0) it else 3 }.coerceIn(2..5)
+                        val squadratLoadRadius = settings.squadratDrawRange.let { if(it > 0) it else 3 }.coerceIn(2..15)
                         val showSquadratGridLines = !settings.areSquadratsDisabled && !settings.hideSquadratGridLines
                         val viewUbersquadrat = Ubersquadrat(centerSquadrat.x - squadratLoadRadius, centerSquadrat.y - squadratLoadRadius, squadratLoadRadius * 2 + 1)
 

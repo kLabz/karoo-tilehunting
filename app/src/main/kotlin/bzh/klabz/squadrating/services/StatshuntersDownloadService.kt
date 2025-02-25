@@ -15,7 +15,9 @@ import bzh.klabz.squadrating.data.Activity
 import bzh.klabz.squadrating.datastores.activityLinesDataStore
 import bzh.klabz.squadrating.datastores.exploredSquadratsDataStore
 import bzh.klabz.squadrating.datastores.userPreferencesDataStore
+import bzh.klabz.squadrating.squadratCenter
 import com.mapbox.geojson.LineString
+import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfConversion
@@ -34,6 +36,227 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class StatshuntersDownloadService(private val applicationContext: Context, val statshuntersTilesProvider: StatshuntersTilesProvider) {
+    fun fillSummaryPolyline(points:MutableList<Point>, lineSquadrats:MutableList<Squadrat>) {
+        fun foo(o:Int):Int {
+            val start = coordsToSquadrat(points[o - 1].latitude(), points[o - 1].longitude())
+            val end = coordsToSquadrat(points[o].latitude(), points[o].longitude())
+            if (start.equals(end) || start.isNeighbourish(end)) return 0
+
+            var i = 1
+            val s = points[o - 1]
+            val e = points[o]
+            val u = Point.fromLngLat(
+                e.longitude() + (s.longitude() - e.longitude()) / 2,
+                e.latitude() + (s.latitude() - e.latitude()) / 2
+            )
+            val d = coordsToSquadrat(u.latitude(), u.longitude())
+            points.add(o, u)
+            lineSquadrats.add(o, d)
+            i += foo(o + 1)
+            i += foo(o)
+            return i
+        }
+        var n = 1
+        val count = points.size
+        while (n < count) {
+            n += foo(n)
+            n++
+        }
+    }
+
+    fun fillSummaryPolyline1(points:MutableList<Point>, lineSquadratinhos:MutableList<Squadratinho>) {
+        fun foo(o:Int):Int {
+            val start = coordsToSquadratinho(points[o - 1].latitude(), points[o - 1].longitude())
+            val end = coordsToSquadratinho(points[o].latitude(), points[o].longitude())
+            if (start.equals(end) || start.isNeighbourish(end)) return 0
+
+            var i = 1
+            val s = points[o - 1]
+            val e = points[o]
+            val u = Point.fromLngLat(
+                e.longitude() + (s.longitude() - e.longitude()) / 2,
+                e.latitude() + (s.latitude() - e.latitude()) / 2
+            )
+            val d = coordsToSquadratinho(u.latitude(), u.longitude())
+            points.add(o, u)
+            lineSquadratinhos.add(o, d)
+            i += foo(o + 1)
+            i += foo(o)
+            return i
+        }
+        var n = 1
+        val count = points.size
+        while (n < count) {
+            n += foo(n)
+            n++
+        }
+    }
+
+    fun cornerPasses(lineSquadrats:List<Squadrat>):List<Pair<Int, Int>> {
+        val ret:MutableList<Pair<Int, Int>> = mutableListOf()
+        if (lineSquadrats.size < 2) return ret
+
+        for (r in 1..(lineSquadrats.size - 1)) {
+            val p1 = lineSquadrats[r-1];
+            val p2 = lineSquadrats[r]
+            if (p1.hasCommonCorners(p2)) ret.add(Pair(r - 1, r))
+        }
+
+        return ret
+    }
+
+    fun det(p1:Pair<Double, Double>, p2:Pair<Double, Double>, p3:Pair<Double, Double>):Double {
+        return (p2.first - p1.first) * (p3.second - p1.second) - (p2.second - p1.second) * (p3.first - p1.first)
+    }
+
+    fun intersect(p1:Pair<Double, Double>, p2:Pair<Double, Double>, p3:Pair<Double, Double>, p4:Pair<Double, Double>):Pair<Double, Double>? {
+        val (t, n) = p1
+        val (r, a) = p2
+        val (o, s) = p3
+        val (e, i) = p4
+
+        if (t == r && n == a || o == e && s == i) return null
+        val denominator = (i - s) * (r - t) - (e - o) * (a - n)
+        if (0 == denominator.toInt()) return null
+        val u = ((e - o) * (n - s) - (i - s) * (t - o)) / denominator
+        val d = ((r - t) * (n - s) - (a - n) * (t - o)) / denominator
+        if (u < 0 || u > 1 || d < 0 || d > 1) return null
+        return Pair(t + u * (r - t), n + u * (a - n))
+    }
+
+    fun findMissingSquadrat(s1:Squadrat, s2:Squadrat, p1:Point, p2:Point):Squadrat? {
+        var i:Squadrat? = null
+        var u = false
+        var d = false
+        var h = false
+        val c = if (s1.y > s2.y) s2 else s1
+        val f = if (s1.y > s2.y) s1 else s2
+        val q = if (s1.y > s2.y) p1 else p2
+        val l = if (s1.y > s2.y) p2 else p1
+
+        var y = squadratCenter(c)
+        var S = squadratCenter(f)
+
+        // TODO: squadratinho only part
+
+        val x = intersect(y, S, Pair(l.latitude(), l.longitude()), Pair(q.latitude(), q.longitude()))
+        if (x != null) {
+            val t = coordsToSquadrat(x.first, x.second)
+            if (t.equals(Squadrat(c.x, c.y))) u = true
+            else if (t.equals(Squadrat(f.x, f.y))) d = true
+        }
+
+        val p = det(squadratCenter(c), squadratCenter(f), Pair(l.latitude(), l.longitude()))
+        val C = det(squadratCenter(c), squadratCenter(f), Pair(q.latitude(), q.longitude()))
+
+        if (!u && !d || (p > 0 && C > 0 || p < 0 && C < 0)) {
+            if (c.x < f.x) {
+                if (p > 0 || C > 0) {
+                    i = Squadrat(f.x, c.y)
+                } else {
+                    if (p < 0 || C < 0) {
+                        i = Squadrat(c.x, f.y)
+                    } else {
+                        h = true
+                    }
+                }
+            } else {
+                if (p > 0 || C > 0) {
+                    i = Squadrat(c.x, f.y)
+                } else {
+                    if (p < 0 || C < 0) {
+                        i = Squadrat(f.x, c.y)
+                    } else {
+                        h = true
+                    }
+                }
+            }
+        } else {
+            if (u) {
+                if (c.x < f.x) {
+                    if (p > 0 || C < 0) {
+                        i = Squadrat(c.x, f.y)
+                    } else {
+                        if (p < 0 || C > 0) {
+                            i = Squadrat(f.x, c.y)
+                        } else {
+                            h = true
+                        }
+                    }
+                } else {
+                    if (p > 0 || C < 0) {
+                        i = Squadrat(f.x, c.y)
+                    } else {
+                        if (p < 0 || C > 0) {
+                            i = Squadrat(c.x, f.y)
+                        } else {
+                            h = true
+                        }
+                    }
+                }
+            } else {
+                if (d && (c.x < f.x)) {
+                    if (p > 0 || C < 0) {
+                        i = Squadrat(f.x, c.y)
+                    } else {
+                        if (p < 0 || C > 0) {
+                            i = Squadrat(c.x, f.y)
+                        } else {
+                            h = true
+                        }
+                    }
+                } else {
+                    if (p > 0 || C < 0) {
+                        i = Squadrat(c.x, f.y)
+                    } else {
+                        if (p < 0 || C > 0) {
+                            i = Squadrat(f.x, c.y)
+                        } else {
+                            h = true
+                        }
+                    }
+                }
+            }
+        }
+
+        if (h) return Squadrat(c.x, f.y)
+        return i
+    }
+
+    fun findMissingSquadrats(points:List<Point>, lineSquadrats:List<Squadrat>):Set<Squadrat> {
+        val ret:MutableSet<Squadrat> = mutableSetOf()
+        val cornerPasses = cornerPasses(lineSquadrats)
+        for ((s1, s2) in cornerPasses) {
+            val o = lineSquadrats[s1]
+            val e = lineSquadrats[s2]
+            val i = points[s1]
+            val u = points[s2]
+            val missingSquadrat = findMissingSquadrat(o, e, i, u)
+            if (missingSquadrat != null) ret.add(missingSquadrat)
+        }
+        return ret
+    }
+
+    fun processLine(line:String, newSquadrats:MutableSet<Squadrat>, newSquadratinhos:MutableSet<Squadratinho>, precision:Int) {
+        var points /* r */ = PolylineUtils.decode(line, precision).toMutableList()
+        val lineSquadrats /* a */ = points.map { coordsToSquadrat(it.latitude(), it.longitude()) }.toMutableList()
+        fillSummaryPolyline(points, lineSquadrats)
+        for (squadrat in lineSquadrats) if (!newSquadrats.contains(squadrat)) newSquadrats.add(squadrat)
+
+        val missingSquadrats = findMissingSquadrats(points, lineSquadrats)
+        for (squadrat in missingSquadrats) if (!newSquadrats.contains(squadrat)) newSquadrats.add(squadrat)
+
+        // TODO: factorize squadratinho handling
+
+        points /* r */ = PolylineUtils.decode(line, precision).toMutableList()
+        val lineSquadratinhos /* a */ = points.map { coordsToSquadratinho(it.latitude(), it.longitude()) }.toMutableList()
+        fillSummaryPolyline1(points, lineSquadratinhos)
+        for (squadratinho in lineSquadratinhos) if (!newSquadratinhos.contains(squadratinho)) newSquadratinhos.add(squadratinho)
+        // TODO
+        // val missingSquadratinhos = findMissingSquadratinhos(points, lineSquadratinhos)
+        // for (squadratinho in missingSquadratinhos) if (!newSquadratinhos.contains(squadratinho)) newSquadratinhos.add(squadratinho)
+    }
+
     fun startJob(): Job {
         return CoroutineScope(Dispatchers.IO).launch {
             applicationContext.exploredSquadratsDataStore.updateData {
@@ -87,24 +310,7 @@ class StatshuntersDownloadService(private val applicationContext: Context, val s
                                         }
                                     }
                                 } else {
-                                    // TODO: fix missing squadrats, then uncomment newSquadrats below and remove this
-                                    activities.forEach {
-                                        it.tiles.forEach {
-                                            val squadrat = Squadrat(it.x, it.y)
-                                            if (!newSquadrats.contains(squadrat)) newSquadrats.add(squadrat)
-                                        }
-                                    }
-
-                                    // TODO: needs equivalent of `findMissingSquadrats`
-                                    lines.forEach {
-                                        PolylineUtils.decode(it.data, 5).forEach {
-                                            // val squadrat = coordsToSquadrat(it.latitude(), it.longitude())
-                                            // if (!newSquadrats.contains(squadrat)) newSquadrats.add(squadrat)
-
-                                            val squadratinho = coordsToSquadratinho(it.latitude(), it.longitude())
-                                            if (!newSquadratinhos.contains(squadratinho)) newSquadratinhos.add(squadratinho)
-                                        }
-                                    }
+                                    lines.forEach { processLine(it.data, newSquadrats, newSquadratinhos, 5 /* precision */) }
                                 }
 
                                 activityCount += activities.size

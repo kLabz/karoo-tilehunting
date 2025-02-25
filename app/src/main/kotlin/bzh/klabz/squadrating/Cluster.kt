@@ -19,11 +19,27 @@ data class Squadrat(val x: Int, val y: Int) {
                 (this.y == squadrat.y && (this.x == squadrat.x + 1 || this.x == squadrat.x - 1))
     }
 
+    fun isNeighbourish(squadrat:Squadrat):Boolean {
+        return this.isNeighbour(squadrat) ||
+            ((this.x == squadrat.x + 1 || this.x == squadrat.x - 1) && (this.y == squadrat.y + 1 || this.y == squadrat.y - 1))
+    }
+
     fun isSurrounded(squadrats: Set<Squadrat>): Boolean {
         return squadrats.contains(Squadrat(x + 1, y)) &&
                 squadrats.contains(Squadrat(x - 1, y)) &&
                 squadrats.contains(Squadrat(x, y + 1)) &&
                 squadrats.contains(Squadrat(x, y - 1))
+    }
+
+    fun hasCommonCorners(squadrat:Squadrat):Boolean {
+        return (this.x == squadrat.x + 1 && this.y == squadrat.y + 1) ||
+            (this.x == squadrat.x - 1 && this.y == squadrat.y - 1) ||
+            (this.x == squadrat.x - 1 && this.y == squadrat.y + 1) ||
+            (this.x == squadrat.x + 1 && this.y == squadrat.y - 1)
+    }
+
+    fun equals(s:Squadrat):Boolean {
+        return this.x == s.x && this.y == s.y
     }
 
     fun getLon(): Double {
@@ -42,9 +58,14 @@ data class Squadrat(val x: Int, val y: Int) {
 
 @Serializable
 data class Squadratinho(val x: Int, val y: Int) {
-    fun isNeighbour(squadrat: Squadratinho): Boolean {
-        return (this.x == squadrat.x && (this.y == squadrat.y + 1 || this.y == squadrat.y - 1)) ||
-                (this.y == squadrat.y && (this.x == squadrat.x + 1 || this.x == squadrat.x - 1))
+    fun isNeighbour(squadratinho: Squadratinho): Boolean {
+        return (this.x == squadratinho.x && (this.y == squadratinho.y + 1 || this.y == squadratinho.y - 1)) ||
+                (this.y == squadratinho.y && (this.x == squadratinho.x + 1 || this.x == squadratinho.x - 1))
+    }
+
+    fun isNeighbourish(squadratinho:Squadratinho):Boolean {
+        return this.isNeighbour(squadratinho) ||
+            ((this.x == squadratinho.x + 1 || this.x == squadratinho.x - 1) && (this.y == squadratinho.y + 1 || this.y == squadratinho.y - 1))
     }
 
     fun isSurrounded(squadratinhos: Set<Squadratinho>): Boolean {
@@ -52,6 +73,10 @@ data class Squadratinho(val x: Int, val y: Int) {
                 squadratinhos.contains(Squadratinho(x - 1, y)) &&
                 squadratinhos.contains(Squadratinho(x, y + 1)) &&
                 squadratinhos.contains(Squadratinho(x, y - 1))
+    }
+
+    fun equals(s:Squadratinho):Boolean {
+        return this.x == s.x && this.y == s.y
     }
 
     fun getLon(): Double {

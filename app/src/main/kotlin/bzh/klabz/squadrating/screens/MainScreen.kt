@@ -62,7 +62,9 @@ enum class SquadratDrawRangeEnum(val radius: Int){
     LOAD_2(2),
     LOAD_3(3),
     LOAD_4(4),
-    LOAD_5(5)
+    LOAD_5(5),
+    LOAD_9(9),
+    LOAD_15(15)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -121,7 +123,7 @@ fun MainScreen(onFinish: () -> Unit) {
     LaunchedEffect(settingsStore){
         coroutineScope.launch {
             val squadratDrawRange = settingsStore?.squadratDrawRange?.let { if(it == 0) 3 else it } ?: 3
-            squadratLoadRange = "${squadratDrawRange.coerceIn(2..5)}"
+            squadratLoadRange = "${squadratDrawRange.coerceIn(2..15)}"
             val squadratinhoDrawRange = settingsStore?.squadratinhoDrawRange?.let { if(it == 0) 3 else it } ?: 3
             squadratinhoLoadRange = "${squadratinhoDrawRange.coerceIn(2..5)}"
         }
@@ -329,6 +331,7 @@ fun MainScreen(onFinish: () -> Unit) {
                     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                         if (exploredSquadratsStore?.isDownloading == true){
                             Column() {
+                                // TODO: downloaded vs processed
                                 Text("Downloaded ${exploredSquadratsStore?.downloadedActivities ?: 0} activities...", fontSize = 14.sp)
                                 LinearProgressIndicator()
                             }
@@ -368,6 +371,7 @@ fun MainScreen(onFinish: () -> Unit) {
                                     ctx.exploredSquadratsDataStore.updateData { exploredSquadrats ->
                                         exploredSquadrats.toBuilder()
                                         .setLastDownloadedAt(0)
+                                        .setDownloadedActivities(0)
                                         .clearExploredSquadrats()
                                         .clearExploredSquadratinhos()
                                         .clearRecentlyExploredSquadrats()
