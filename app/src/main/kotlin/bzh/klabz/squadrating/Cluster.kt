@@ -344,6 +344,7 @@ open class ClusterSquadratinho {
      * The insetOffset is provided in meters and will be converted to degrees.
      */
     fun getPolyline(insetOffset: Double = 50.0): List<LineString> {
+        val insetOffset: Double = insetOffset / 8.0
         if (squadratinhos.isEmpty()) return emptyList()
 
         val insetDegrees = TurfConversion.lengthToDegrees(insetOffset, TurfConstants.UNIT_METERS)
