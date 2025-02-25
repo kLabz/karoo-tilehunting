@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.rememberScrollState
@@ -235,9 +236,32 @@ fun MainScreen(onFinish: () -> Unit) {
                                         Image(painterResource(id = R.drawable.yard), contentDescription = "Yard")
                                     }
                                     spacer()
-                                    Column(modifier = Modifier.weight(18f)) {
+                                    Column(modifier = Modifier.weight(8f)) {
                                         Text(text = "$yard", fontWeight = FontWeight.Bold, lineHeight = lineHeight)
                                         Text(text = "Yard", fontSize = 10.sp, lineHeight = lineHeight)
+                                    }
+                                    Column(modifier = Modifier.weight(10f)) {
+                                        if (recentSquadratsCount > 0 || recentNewSquadratsCount > 0 || recentNewSquadratinhosCount > 0) {
+                                            FilledTonalButton(
+                                                modifier = Modifier.height(20.dp).fillMaxWidth(),
+                                                contentPadding = PaddingValues(vertical = 0.dp),
+                                                onClick = {
+                                                    coroutineScope.launch {
+                                                        ctx.exploredSquadratsDataStore.updateData { exploredSquadrats ->
+                                                            exploredSquadrats.toBuilder()
+                                                                .clearRecentlyExploredSquadrats()
+                                                                .clearRecentlyExploredNewSquadrats()
+                                                                .clearRecentlyExploredSquadratinhos()
+                                                                .clearRecentlyExploredNewSquadratinhos()
+                                                                .build()
+                                                        }
+                                                        clearedRecentExploredSquadratsDialogVisible = true
+                                                    }
+                                                }
+                                            ) {
+                                                Text("Reset recent", fontSize = 10.sp, lineHeight = 0.6.sp)
+                                            }
+                                        }
                                     }
                                     spacer()
                                 }
@@ -294,9 +318,32 @@ fun MainScreen(onFinish: () -> Unit) {
                                         Image(painterResource(id = R.drawable.yardinho), contentDescription = "Yardinho")
                                     }
                                     spacer()
-                                    Column(modifier = Modifier.weight(18f)) {
+                                    Column(modifier = Modifier.weight(8f)) {
                                         Text(text = "$yardinho", fontWeight = FontWeight.Bold, lineHeight = lineHeight)
                                         Text(text = "Yardinho", fontSize = 10.sp, lineHeight = lineHeight)
+                                    }
+                                    Column(modifier = Modifier.weight(10f)) {
+                                        if (recentSquadratsCount > 0 || recentNewSquadratsCount > 0 || recentNewSquadratinhosCount > 0) {
+                                            FilledTonalButton(
+                                                modifier = Modifier.height(20.dp).fillMaxWidth(),
+                                                contentPadding = PaddingValues(vertical = 0.dp),
+                                                onClick = {
+                                                    coroutineScope.launch {
+                                                        ctx.exploredSquadratsDataStore.updateData { exploredSquadrats ->
+                                                            exploredSquadrats.toBuilder()
+                                                                .clearRecentlyExploredSquadrats()
+                                                                .clearRecentlyExploredNewSquadrats()
+                                                                .clearRecentlyExploredSquadratinhos()
+                                                                .clearRecentlyExploredNewSquadratinhos()
+                                                                .build()
+                                                        }
+                                                        clearedRecentExploredSquadratsDialogVisible = true
+                                                    }
+                                                }
+                                            ) {
+                                                Text("Reset recent", fontSize = 10.sp, lineHeight = 0.6.sp)
+                                            }
+                                        }
                                     }
                                     spacer()
                                 }
@@ -403,26 +450,6 @@ fun MainScreen(onFinish: () -> Unit) {
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(text = "Connect", fontSize = 12.sp, lineHeight = 0.6.sp)
                             }
-                        }
-                    }
-
-                    if (recentSquadratsCount > 0 || recentNewSquadratsCount > 0 || recentNewSquadratinhosCount > 0) {
-                        FilledTonalButton(modifier = Modifier.height(30.dp).fillMaxWidth(), onClick = {
-                            coroutineScope.launch {
-                                ctx.exploredSquadratsDataStore.updateData { exploredSquadrats ->
-                                    exploredSquadrats.toBuilder()
-                                        .clearRecentlyExploredSquadrats()
-                                        .clearRecentlyExploredNewSquadrats()
-                                        .clearRecentlyExploredSquadratinhos()
-                                        .clearRecentlyExploredNewSquadratinhos()
-                                        .build()
-                                }
-                                clearedRecentExploredSquadratsDialogVisible = true
-                            }
-                        }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Reset recent squadrats")
-                            Spacer(modifier = Modifier.width(5.dp))
-                            Text("Reset recent squadrats", fontSize = 12.sp, lineHeight = 0.6.sp)
                         }
                     }
                 }
