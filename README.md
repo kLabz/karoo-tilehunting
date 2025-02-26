@@ -16,6 +16,8 @@ Compatible with Karoo 2 and Karoo 3 devices.
 
 ![Menu](menu.png)
 ![Tiles](tiles.png)
+![Fields 1](fields1.png)
+![Fields 2](fields2.png)
 
 ## Installation
 
