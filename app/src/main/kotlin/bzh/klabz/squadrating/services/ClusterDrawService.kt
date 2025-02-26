@@ -123,17 +123,26 @@ class ClusterDrawService(private val karooSystem: KarooSystemServiceProvider,
                         val squadratLoadRadius = settings.squadratDrawRange.let { if(it > 0) it else 3 }.coerceIn(2..5)
                         val showSquadratGridLines = !settings.areSquadratsDisabled && !settings.hideSquadratGridLines
                         val viewUbersquadrat = Ubersquadrat(centerSquadrat.x - squadratLoadRadius, centerSquadrat.y - squadratLoadRadius, squadratLoadRadius * 2 + 1)
-                        Log.i(TAG, "View ubersquadrat: $viewUbersquadrat")
 
-                        val viewUbersquadratinho = Ubersquadratinho(viewUbersquadrat.x * 8, viewUbersquadrat.y * 8, viewUbersquadrat.size * 8)
-                        Log.i(TAG, "View ubersquadratinho: $viewUbersquadratinho")
+                        val squadratinhoLoadRadius = settings.squadratinhoDrawRange.let { if(it > 0) it else 3 }.coerceIn(2..5)
+                        val viewUbersquadratinho = Ubersquadratinho(centerSquadratinho.x - squadratinhoLoadRadius, centerSquadratinho.y - squadratinhoLoadRadius, squadratinhoLoadRadius * 2 + 1)
 
                         val squadratLoadRangeX = centerSquadrat.x - squadratLoadRadius..centerSquadrat.x + squadratLoadRadius
                         val squadratLoadRangeY = centerSquadrat.y - squadratLoadRadius..centerSquadrat.y + squadratLoadRadius
 
-                        val squadratinhoLoadRangeX = viewUbersquadratinho.x..viewUbersquadratinho.x + viewUbersquadratinho.size
-                        val squadratinhoLoadRangeY = viewUbersquadratinho.y..viewUbersquadratinho.y + viewUbersquadratinho.size
+                        val squadratinhoLoadRangeX = centerSquadratinho.x - squadratinhoLoadRadius..centerSquadratinho.x + squadratinhoLoadRadius
+                        val squadratinhoLoadRangeY = centerSquadratinho.y - squadratinhoLoadRadius..centerSquadratinho.y + squadratinhoLoadRadius
 
+                        // val insetOffset = when (mapZoom) {
+                        //     in 0..10 -> 175.0
+                        //     11 -> 125.0
+                        //     12 -> 75.0
+                        //     13 -> 37.5
+                        //     14 -> 25.0
+                        //     15 -> 15.0
+                        //     16 -> 10.0
+                        //     else -> 5.0
+                        // }
                         val insetOffset = if (mapZoom <= 10) {
                             175.0
                         } else {
