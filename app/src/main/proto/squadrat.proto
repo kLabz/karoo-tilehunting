@@ -36,4 +36,9 @@ message ExploredSquadrats {
 
   uint32 yard = 17;
   uint32 yardinho = 18;
+
+  uint32 previousYard = 19;
+  uint32 previousYardinho = 20;
+  uint32 previousUbersquadratSize = 21;
+  uint32 previousUbersquadratinhoSize = 22;
 }

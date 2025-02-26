@@ -13,4 +13,26 @@
     <string name="dual_trip_description">Dual field with both recently explored and new squadrats</string>
     <string name="dual_alltime">Dual statshunter</string>
     <string name="dual_alltime_description">Dual field with explored squadrats and ubersquadrat size</string>
+
+    <string name="quad_squadrats">All/new Squadrats</string>
+    <string name="quad_squadrats_description">Dual field with explored/new (tap to cycle) squadrats and squadratinhos</string>
+
+    <string name="quad_yard">Yard[inho] size/incr</string>
+    <string name="quad_yard_description">Dual field with size/increase (tap to cycle) of yard and yardinho</string>
+
+    <string name="quad_uber">Ubersquadrat[inho] size/incr</string>
+    <string name="quad_uber_description">Dual field with size/increase (tap to cycle) of ubersquadrat[inho]</string>
+
+    <string name="quad_yard_uber">Yard / Ubersquadrat</string>
+    <string name="quad_yard_uber_description">Dual field with yard/ubersquadrat (tap to cycle squadrat/squadratinho)</string>
+
+    <string name="dual_time">Dual Time To Dest</string>
+    <string name="dual_time_description">Time to destination / time of arrival (when a route is added)</string>
+
+    <string name="dual_ride_time">Dual Ride Time</string>
+    <string name="dual_ride_time_description">Elapsed time / paused time dual field</string>
+
+    <string name="dual_ride_summary">Dual Ride Summary</string>
+    <string name="dual_ride_summary_description">Distance / ascent for current ride</string>
+
 </resources>

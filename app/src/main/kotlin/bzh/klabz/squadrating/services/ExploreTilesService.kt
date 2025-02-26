@@ -192,7 +192,6 @@ class ExploreSquadratsService(private val karooSystem: KarooSystemServiceProvide
                         val updatedYard = calcYard(exploredSquadrats)
                         val updatedYardinho = calcYardinho(exploredSquadratinhos)
 
-
                         if (updatedUbersquadrat != null && updatedUbersquadrat!!.size > data.biggestUbersquadratSize) {
                             karooSystem.karooSystemService.dispatch(
                                 InRideAlert(id = "incrubersquadrat-${System.currentTimeMillis()}",

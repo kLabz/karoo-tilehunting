@@ -11,26 +11,50 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi
 import androidx.glance.appwidget.GlanceRemoteViews
 import bzh.klabz.squadrating.R
+import bzh.klabz.squadrating.streamDataFlow
 import bzh.klabz.squadrating.datastores.exploredSquadratsDataStore
+import bzh.klabz.squadrating.SquadratingExtension.Companion.TAG
 import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.internal.Emitter
 import io.hammerhead.karooext.internal.ViewEmitter
+import io.hammerhead.karooext.models.StreamState
+import io.hammerhead.karooext.models.DataType
 import io.hammerhead.karooext.models.ShowCustomStreamState
 import io.hammerhead.karooext.models.UpdateGraphicConfig
 import io.hammerhead.karooext.models.ViewConfig
+import java.text.DateFormat
+import java.util.Calendar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
+// TODO: move to separate extension
 @OptIn(ExperimentalGlanceRemoteViewsApi::class)
-class DualAllTimeDataType(
+class DualRideTimeDataType(
+    private val karooSystem: KarooSystemService,
     private val applicationContext: Context
-) : DataTypeImpl("squadrating", "dual_alltime") {
+) : DataTypeImpl("squadrating", "dual_ride_time") {
     protected val glance = GlanceRemoteViews()
+
+    private fun collectDouble(stream:StreamState):Double {
+        return when (stream) {
+            StreamState.Idle, StreamState.Searching, StreamState.NotAvailable -> 0.toDouble()
+            else -> (stream as? StreamState.Streaming)?.dataPoint?.singleValue?.toDouble() ?: 0.toDouble()
+        }
+    }
+
+    private fun formatTimeFromSeconds(seconds: Double): String {
+        val totalMinutes = (seconds / 60).toInt()
+        val hours = totalMinutes / 60
+        val minutes = totalMinutes % 60
+        return "${hours}:${minutes.toString().padStart(2, '0')}"
+    }
 
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
         val scope = CoroutineScope(Dispatchers.IO + Job())
@@ -42,16 +66,23 @@ class DualAllTimeDataType(
         }
 
         val viewjob = scope.launch {
-            applicationContext.exploredSquadratsDataStore.data.collect { exploredSquadrats ->
-                val tiles = exploredSquadrats.exploredSquadratsCount
-                val ubersquadratSize = exploredSquadrats.biggestUbersquadratSize
+            val totalFlow = karooSystem.streamDataFlow(DataType.Type.ELAPSED_TIME)
+            val pausedFlow = karooSystem.streamDataFlow(DataType.Type.PAUSED_TIME)
+
+            combine(totalFlow, pausedFlow) { (total, paused) -> Pair(total, paused) }
+            .distinctUntilChanged()
+            .collect { (totalStream, pausedStream) ->
+                val total = collectDouble(totalStream)
+                val paused = collectDouble(pausedStream)
+                // Log.d(TAG, "Collected ${total}, ${paused}")
+
                 var view = glance.compose(context, DpSize.Unspecified) {
                     Box(modifier = GlanceModifier.fillMaxSize()) {
                         DoubleTypesVerticalScreen(
-                            tiles.toString(),
-                            "${ubersquadratSize}x${ubersquadratSize}",
-                            R.drawable.been_here,
-                            R.drawable.area,
+                            "${formatTimeFromSeconds(total/1000)}",
+                            "${formatTimeFromSeconds(paused/1000)}",
+                            R.drawable.time,
+                            R.drawable.pause_circle,
                             Color(ContextCompat.getColor(applicationContext, R.color.icongreen))
                         )
                     }

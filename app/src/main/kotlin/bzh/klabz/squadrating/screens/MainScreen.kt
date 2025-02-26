@@ -405,36 +405,52 @@ fun MainScreen(onFinish: () -> Unit) {
 
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         var connectModifier = Modifier.height(30.dp).weight(2f)
-                        if (exploredSquadratsStore?.isDownloading != true && !settingsStore?.statshuntersSharecode.isNullOrBlank()){
+                        if (exploredSquadratsStore?.isDownloading != true && !settingsStore?.statshuntersSharecode.isNullOrBlank()) {
                             connectModifier = connectModifier.fillMaxWidth()
 
                             FilledTonalButton(modifier = Modifier.height(30.dp).weight(2f), onClick = {
                                 coroutineScope.launch {
                                     ctx.exploredSquadratsDataStore.updateData { exploredSquadrats ->
                                         exploredSquadrats.toBuilder()
+                                        // TODO
                                         .setLastDownloadedAt(0)
                                         .setDownloadedActivities(0)
-                                        .clearExploredSquadrats()
-                                        .clearExploredSquadratinhos()
-                                        .clearRecentlyExploredSquadrats()
-                                        .clearRecentlyExploredNewSquadrats()
-                                        .clearRecentlyExploredNewSquadratinhos()
-                                        .setBiggestUbersquadratX(0)
-                                        .setBiggestUbersquadratY(0)
-                                        .setBiggestUbersquadratSize(0)
-                                        .setBiggestUbersquadratinhoX(0)
-                                        .setBiggestUbersquadratinhoY(0)
-                                        .setBiggestUbersquadratinhoSize(0)
-                                        .setYard(0)
-                                        .setYardinho(0)
                                         .build()
                                     }
                                 }
                             }) {
                                 Icon(Icons.Default.Refresh, contentDescription = "Update Squadrats")
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = "Reload", fontSize = 12.sp, lineHeight = 0.6.sp)
+                                Text(text = "Fetch", fontSize = 12.sp, lineHeight = 0.6.sp)
                             }
+
+                            // FilledTonalButton(modifier = Modifier.height(30.dp).weight(2f), onClick = {
+                            //     coroutineScope.launch {
+                            //         ctx.exploredSquadratsDataStore.updateData { exploredSquadrats ->
+                            //             exploredSquadrats.toBuilder()
+                            //             .setLastDownloadedAt(0)
+                            //             .setDownloadedActivities(0)
+                            //             .clearExploredSquadrats()
+                            //             .clearExploredSquadratinhos()
+                            //             .clearRecentlyExploredSquadrats()
+                            //             .clearRecentlyExploredNewSquadrats()
+                            //             .clearRecentlyExploredNewSquadratinhos()
+                            //             .setBiggestUbersquadratX(0)
+                            //             .setBiggestUbersquadratY(0)
+                            //             .setBiggestUbersquadratSize(0)
+                            //             .setBiggestUbersquadratinhoX(0)
+                            //             .setBiggestUbersquadratinhoY(0)
+                            //             .setBiggestUbersquadratinhoSize(0)
+                            //             .setYard(0)
+                            //             .setYardinho(0)
+                            //             .build()
+                            //         }
+                            //     }
+                            // }) {
+                            //     Icon(Icons.Default.Refresh, contentDescription = "Update Squadrats")
+                            //     Spacer(modifier = Modifier.width(4.dp))
+                            //     Text(text = "Reload", fontSize = 12.sp, lineHeight = 0.6.sp)
+                            // }
 
                             Spacer(modifier = Modifier.width(5.dp))
                         }

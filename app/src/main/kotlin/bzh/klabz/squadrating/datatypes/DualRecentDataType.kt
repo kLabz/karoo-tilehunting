@@ -5,6 +5,9 @@ import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.core.content.ContextCompat
+import androidx.glance.GlanceModifier
+import androidx.glance.layout.Box
+import androidx.glance.layout.fillMaxSize
 import androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi
 import androidx.glance.appwidget.GlanceRemoteViews
 import bzh.klabz.squadrating.R
@@ -23,6 +26,8 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+import io.hammerhead.karooext.models.DataType
+
 @OptIn(ExperimentalGlanceRemoteViewsApi::class)
 class DualRecentDataType(
     private val applicationContext: Context
@@ -38,18 +43,26 @@ class DualRecentDataType(
             awaitCancellation()
         }
 
+        // DataType.Type.TIME_TO_DESTINATION
+        // DataType.Type.TIME_OF_ARRIVAL
+
+        // DataType.Type.DISTANCE
+        // DataType.Type.ELEVATION_GAIN
+
         val viewjob = scope.launch {
             applicationContext.exploredSquadratsDataStore.data.collect { exploredSquadrats ->
                 val recentSquadrats = exploredSquadrats.recentlyExploredSquadratsCount
                 val newSquadrats = exploredSquadrats.recentlyExploredNewSquadratsCount
                 var view = glance.compose(context, DpSize.Unspecified) {
-                    DoubleTypesVerticalScreen(
-                        recentSquadrats.toString(),
-                        newSquadrats.toString(),
-                        R.drawable.trip,
-                        R.drawable.location_plus,
-                        Color(ContextCompat.getColor(applicationContext, R.color.icongreen))
-                    )
+                    Box(modifier = GlanceModifier.fillMaxSize()) {
+                        DoubleTypesVerticalScreen(
+                            recentSquadrats.toString(),
+                            newSquadrats.toString(),
+                            R.drawable.trip,
+                            R.drawable.location_plus,
+                            Color(ContextCompat.getColor(applicationContext, R.color.icongreen))
+                        )
+                    }
                 }.remoteViews
                 emitter.updateView(view)
             }

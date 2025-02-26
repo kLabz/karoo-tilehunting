@@ -5,6 +5,13 @@ import android.util.Log
 import bzh.klabz.squadrating.calcYard
 import bzh.klabz.squadrating.calcYardinho
 import bzh.klabz.squadrating.datastores.exploredSquadratsDataStore
+import bzh.klabz.squadrating.datatypes.QuadSquadratsDataType
+import bzh.klabz.squadrating.datatypes.QuadYardDataType
+import bzh.klabz.squadrating.datatypes.QuadUberDataType
+import bzh.klabz.squadrating.datatypes.QuadYardUberDataType
+import bzh.klabz.squadrating.datatypes.DualTimeDataType
+import bzh.klabz.squadrating.datatypes.DualRideTimeDataType
+import bzh.klabz.squadrating.datatypes.DualRideSummaryDataType
 import bzh.klabz.squadrating.datatypes.DualAllTimeDataType
 import bzh.klabz.squadrating.datatypes.DualRecentDataType
 import bzh.klabz.squadrating.datatypes.ExploredSquadratsDataType
@@ -52,6 +59,16 @@ class SquadratingExtension : KarooExtension("squadrating", "1.0-beta6") {
 
     override val types by lazy {
         listOf(
+            QuadSquadratsDataType(applicationContext),
+            QuadYardDataType(applicationContext),
+            QuadUberDataType(applicationContext),
+            QuadYardUberDataType(applicationContext),
+
+            // TODO: move to separate extension
+            DualTimeDataType(karooSystem.karooSystemService, applicationContext),
+            DualRideTimeDataType(karooSystem.karooSystemService, applicationContext),
+            DualRideSummaryDataType(karooSystem.karooSystemService, applicationContext),
+
             DualAllTimeDataType(applicationContext),
             DualRecentDataType(applicationContext),
             ExploredSquadratsDataType(karooSystem.karooSystemService, applicationContext),

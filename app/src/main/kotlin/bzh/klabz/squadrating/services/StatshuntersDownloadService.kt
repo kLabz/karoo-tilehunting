@@ -370,7 +370,8 @@ class StatshuntersDownloadService(private val applicationContext: Context, val s
         return ret
     }
 
-    fun processLine(line:String, newSquadrats:MutableSet<Squadrat>, newSquadratinhos:MutableSet<Squadratinho>, precision:Int) {
+    fun processActivity(activity:Activity, newSquadrats:MutableSet<Squadrat>, newSquadratinhos:MutableSet<Squadratinho>, precision:Int) {
+        val line = activity.encodedPolyline
         var points = PolylineUtils.decode(line, precision).toMutableList()
         val lineSquadrats = points.map { coordsToSquadrat(it.latitude(), it.longitude()) }.toMutableList()
         fillSummaryPolyline(points, lineSquadrats)
@@ -419,66 +420,16 @@ class StatshuntersDownloadService(private val applicationContext: Context, val s
                     }
 
                     try {
-                        var activityCount = 0
                         val sharecode = applicationContext.userPreferencesDataStore.data.first().statshuntersSharecode
+                        var activityCount = 0
                         statshuntersTilesProvider.requestTiles(sharecode.trim()).collect { (activities, lines) ->
                             Log.d(TAG, "Received ${activities.size} activities with ${lines?.size} lines")
                             val hasLines = !lines.isNullOrEmpty() && lines.size == activities.size
 
                             applicationContext.exploredSquadratsDataStore.updateData { exploredSquadrats ->
-                                val alreadyExploredSquadrats = exploredSquadrats.exploredSquadratsList.map { Squadrat(it.x, it.y) }.toSet()
-                                val alreadyExploredSquadratinhos = exploredSquadrats.exploredSquadratinhosList.map { Squadratinho(it.x, it.y) }.toSet()
-
-                                val newSquadrats:MutableSet<Squadrat> = mutableSetOf()
-                                val newSquadratinhos:MutableSet<Squadratinho> = mutableSetOf()
-                                if (!hasLines) {
-                                    // Fallback to statshunters tiles, but then there will be no squadratinho support
-                                    activities.forEach {
-                                        it.tiles.forEach {
-                                            val squadrat = Squadrat(it.x, it.y)
-                                            if (!newSquadrats.contains(squadrat)) newSquadrats.add(squadrat)
-                                        }
-                                    }
-                                } else {
-                                    lines.forEach { processLine(it.data, newSquadrats, newSquadratinhos, 5 /* precision */) }
-                                }
-
                                 activityCount += activities.size
-                                val updatedExploredSquadrats = alreadyExploredSquadrats + newSquadrats
-                                val updatedExploredSquadratsProto = updatedExploredSquadrats.map {
-                                    bzh.klabz.squadrating.data.Squadrat.newBuilder().setX(it.x).setY(it.y).build()
-                                }
-                                Log.d(TAG, "New explored squadrats count: ${updatedExploredSquadrats.size}, $activityCount activities")
-                                val updatedUbersquadrat = Ubersquadrat.getBiggestUbersquadrat(updatedExploredSquadrats)
-                                Log.d(TAG, "New ubersquadrat: $updatedUbersquadrat")
-
-                                val updatedExploredSquadratinhos = alreadyExploredSquadratinhos + newSquadratinhos
-                                val updatedExploredSquadratinhosProto = updatedExploredSquadratinhos.map {
-                                    bzh.klabz.squadrating.data.Squadratinho.newBuilder().setX(it.x).setY(it.y).build()
-                                }
-                                Log.d(TAG, "New explored squadratinhos count: ${updatedExploredSquadratinhos.size}, $activityCount activities")
-                                val updatedUbersquadratinho = Ubersquadratinho.getBiggestUbersquadratinho(updatedExploredSquadratinhos)
-                                Log.d(TAG, "New ubersquadratinho: $updatedUbersquadratinho")
-
-                                val updatedYard = calcYard(updatedExploredSquadrats)
-                                Log.d(TAG, "New yard: $updatedYard")
-                                val updatedYardinho = calcYardinho(updatedExploredSquadratinhos)
-                                Log.d(TAG, "New yardinho: $updatedYardinho")
-
                                 exploredSquadrats.toBuilder()
                                     .setDownloadedActivities(activityCount)
-                                    .clearExploredSquadrats()
-                                    .clearExploredSquadratinhos()
-                                    .addAllExploredSquadrats(updatedExploredSquadratsProto)
-                                    .addAllExploredSquadratinhos(updatedExploredSquadratinhosProto)
-                                    .setBiggestUbersquadratX(updatedUbersquadrat?.x ?: 0)
-                                    .setBiggestUbersquadratY(updatedUbersquadrat?.y ?: 0)
-                                    .setBiggestUbersquadratSize(updatedUbersquadrat?.size ?: 0)
-                                    .setBiggestUbersquadratinhoX(updatedUbersquadratinho?.x ?: 0)
-                                    .setBiggestUbersquadratinhoY(updatedUbersquadratinho?.y ?: 0)
-                                    .setBiggestUbersquadratinhoSize(updatedUbersquadratinho?.size ?: 0)
-                                    .setYard(updatedYard)
-                                    .setYardinho(updatedYardinho)
                                     .build()
                             }
 
@@ -530,6 +481,58 @@ class StatshuntersDownloadService(private val applicationContext: Context, val s
                                 applicationContext.activityLinesDataStore.updateData { activityLines ->
                                     val existingActivities = activityLines.activitiesList.map { it.id }.toSet()
                                     val newActivities = sortedActivityList.filter { it.id !in existingActivities }
+
+                                    applicationContext.exploredSquadratsDataStore.updateData { exploredSquadrats ->
+                                        val alreadyExploredSquadrats = exploredSquadrats.exploredSquadratsList.map { Squadrat(it.x, it.y) }.toSet()
+                                        val alreadyExploredSquadratinhos = exploredSquadrats.exploredSquadratinhosList.map { Squadratinho(it.x, it.y) }.toSet()
+
+                                        val newSquadrats:MutableSet<Squadrat> = mutableSetOf()
+                                        val newSquadratinhos:MutableSet<Squadratinho> = mutableSetOf()
+                                        newActivities.forEach { processActivity(it, newSquadrats, newSquadratinhos, 5 /* precision */) }
+
+                                        val updatedExploredSquadrats = alreadyExploredSquadrats + newSquadrats
+                                        val updatedExploredSquadratsProto = updatedExploredSquadrats.map {
+                                            bzh.klabz.squadrating.data.Squadrat.newBuilder().setX(it.x).setY(it.y).build()
+                                        }
+                                        Log.d(TAG, "New explored squadrats count: ${updatedExploredSquadrats.size}, $activityCount activities")
+                                        val updatedUbersquadrat = Ubersquadrat.getBiggestUbersquadrat(updatedExploredSquadrats)
+                                        Log.d(TAG, "New ubersquadrat: $updatedUbersquadrat")
+
+                                        val updatedExploredSquadratinhos = alreadyExploredSquadratinhos + newSquadratinhos
+                                        val updatedExploredSquadratinhosProto = updatedExploredSquadratinhos.map {
+                                            bzh.klabz.squadrating.data.Squadratinho.newBuilder().setX(it.x).setY(it.y).build()
+                                        }
+                                        Log.d(TAG, "New explored squadratinhos count: ${updatedExploredSquadratinhos.size}, $activityCount activities")
+                                        val updatedUbersquadratinho = Ubersquadratinho.getBiggestUbersquadratinho(updatedExploredSquadratinhos)
+                                        Log.d(TAG, "New ubersquadratinho: $updatedUbersquadratinho")
+
+                                        val updatedYard = calcYard(updatedExploredSquadrats)
+                                        Log.d(TAG, "New yard: $updatedYard")
+                                        val updatedYardinho = calcYardinho(updatedExploredSquadratinhos)
+                                        Log.d(TAG, "New yardinho: $updatedYardinho")
+
+                                        exploredSquadrats.toBuilder()
+                                            .clearExploredSquadrats()
+                                            .clearExploredSquadratinhos()
+                                            .clearRecentlyExploredSquadrats()
+                                            .clearRecentlyExploredNewSquadrats()
+                                            .clearRecentlyExploredNewSquadratinhos()
+                                            .addAllExploredSquadrats(updatedExploredSquadratsProto)
+                                            .addAllExploredSquadratinhos(updatedExploredSquadratinhosProto)
+                                            .setBiggestUbersquadratX(updatedUbersquadrat?.x ?: 0)
+                                            .setBiggestUbersquadratY(updatedUbersquadrat?.y ?: 0)
+                                            .setPreviousUbersquadratSize(updatedUbersquadrat?.size ?: 0)
+                                            .setBiggestUbersquadratSize(updatedUbersquadrat?.size ?: 0)
+                                            .setBiggestUbersquadratinhoX(updatedUbersquadratinho?.x ?: 0)
+                                            .setBiggestUbersquadratinhoY(updatedUbersquadratinho?.y ?: 0)
+                                            .setPreviousUbersquadratinhoSize(updatedUbersquadratinho?.size ?: 0)
+                                            .setBiggestUbersquadratinhoSize(updatedUbersquadratinho?.size ?: 0)
+                                            .setYard(updatedYard)
+                                            .setPreviousYard(updatedYard)
+                                            .setYardinho(updatedYardinho)
+                                            .setPreviousYardinho(updatedYardinho)
+                                            .build()
+                                    }
 
                                     activityLines.toBuilder().addAllActivities(newActivities).build()
                                 }

@@ -8,6 +8,55 @@
     fitFile="true">
 
     <DataType
+        description="@string/quad_squadrats_description"
+        displayName="@string/quad_squadrats"
+        graphical="true"
+        icon="@drawable/squadrat"
+        typeId="quad_squadrats" />
+
+    <DataType
+        description="@string/quad_yard_description"
+        displayName="@string/quad_yard"
+        graphical="true"
+        icon="@drawable/yard"
+        typeId="quad_yard" />
+
+    <DataType
+        description="@string/quad_uber_description"
+        displayName="@string/quad_uber"
+        graphical="true"
+        icon="@drawable/ubersquadrat"
+        typeId="quad_uber" />
+
+    <DataType
+        description="@string/quad_yard_uber_description"
+        displayName="@string/quad_yard_uber"
+        graphical="true"
+        icon="@drawable/yard"
+        typeId="quad_yard_uber" />
+
+    <DataType
+        description="@string/dual_time_description"
+        displayName="@string/dual_time"
+        graphical="true"
+        icon="@drawable/time"
+        typeId="dual_time" />
+
+    <DataType
+        description="@string/dual_ride_time_description"
+        displayName="@string/dual_ride_time"
+        graphical="true"
+        icon="@drawable/time"
+        typeId="dual_ride_time" />
+
+    <DataType
+        description="@string/dual_ride_summary_description"
+        displayName="@string/dual_ride_summary"
+        graphical="true"
+        icon="@drawable/trip"
+        typeId="dual_ride_summary" />
+
+    <DataType
         description="@string/dual_trip_description"
         displayName="@string/dual_trip"
         graphical="true"
