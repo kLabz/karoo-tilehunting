@@ -61,7 +61,7 @@ class CyclePageAction : ActionCallback {
 @Composable
 fun HorizontalScreenContent(number: String, icon: Int, iconColor:Color? = null) {
     Row(
-        modifier = GlanceModifier.fillMaxWidth().fillMaxHeight(),
+        modifier = GlanceModifier.fillMaxWidth().fillMaxHeight().padding(horizontal = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.End
     ) {
@@ -86,7 +86,6 @@ fun HorizontalScreenContent(number: String, icon: Int, iconColor:Color? = null) 
                 iconColor
             ))
         )
-        Spacer(modifier = GlanceModifier.width(1.dp).fillMaxHeight())
     }
 }
 
@@ -100,8 +99,7 @@ fun DoubleTypesVerticalScreen(
     rightIcon: Int,
     iconColor:Color? = null
 ) {
-    Column(modifier = GlanceModifier.fillMaxSize()) {
-        Spacer(modifier = GlanceModifier.fillMaxWidth().height(2.dp))
+    Column(modifier = GlanceModifier.fillMaxSize().padding(vertical = 5.dp)) {
         Column(modifier = GlanceModifier.defaultWeight()) {
             HorizontalScreenContent(leftNumber, leftIcon, iconColor)
         }
