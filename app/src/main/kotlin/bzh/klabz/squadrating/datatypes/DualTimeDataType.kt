@@ -33,6 +33,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 // TODO: move to separate extension
 @OptIn(ExperimentalGlanceRemoteViewsApi::class)
@@ -49,8 +50,7 @@ class DualTimeDataType(
         }
     }
 
-    private fun formatTimeFromSeconds(seconds: Double): String {
-        val totalMinutes = (seconds / 60).toInt()
+    private fun formatTimeFromMinutes(totalMinutes: Int): String {
         val hours = totalMinutes / 60
         val minutes = totalMinutes % 60
         return "${hours}:${minutes.toString().padStart(2, '0')}"
@@ -66,18 +66,17 @@ class DualTimeDataType(
         val scope = CoroutineScope(Dispatchers.IO + Job())
 
         val viewjob = scope.launch {
-            // TODO: handle "No route"
             val ttdFlow = karooSystem.streamDataFlow(DataType.Type.TIME_TO_DESTINATION)
             val toaFlow = karooSystem.streamDataFlow(DataType.Type.TIME_OF_ARRIVAL)
 
-            combine(ttdFlow, toaFlow) { (ttd, toa) -> Pair(ttd, toa) }
+            combine(ttdFlow, toaFlow) { (ttd, toa) ->
+                Pair((collectDouble(ttd) / 60000).roundToInt(), epochToTimeOfDay(collectDouble(toa)))
+            }
             .distinctUntilChanged()
-            .collect { (ttdStream, toaStream) ->
-                val ttd = collectDouble(ttdStream)
-                val toa = collectDouble(toaStream)
+            .collect { (ttd, toa) ->
                 // Log.d(TAG, "Collected ${ttd}, ${toa}")
 
-                if (ttd == 0.toDouble() && toa == 0.toDouble()) {
+                if (ttd == 0) {
                     // Log.d(TAG, "No route")
                     emitter.onNext(UpdateGraphicConfig(showHeader = true))
                     emitter.onNext(ShowCustomStreamState(message = "No route", color = ContextCompat.getColor(applicationContext, R.color.white)))
@@ -88,8 +87,8 @@ class DualTimeDataType(
                     var view = glance.compose(context, DpSize.Unspecified) {
                         Box(modifier = GlanceModifier.fillMaxSize()) {
                             DoubleTypesVerticalScreen(
-                                "${formatTimeFromSeconds(ttd/1000)}",
-                                "${epochToTimeOfDay(toa)}",
+                                "${formatTimeFromMinutes(ttd)}",
+                                "${toa}",
                                 R.drawable.timer,
                                 R.drawable.time,
                                 Color(ContextCompat.getColor(applicationContext, R.color.icongreen))

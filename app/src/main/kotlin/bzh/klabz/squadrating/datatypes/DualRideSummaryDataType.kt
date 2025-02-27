@@ -62,18 +62,16 @@ class DualRideSummaryDataType(
             val distanceFlow = karooSystem.streamDataFlow(DataType.Type.DISTANCE)
             val elevationFlow = karooSystem.streamDataFlow(DataType.Type.ELEVATION_GAIN)
 
-            combine(distanceFlow, elevationFlow) { (distance, elevation) -> Pair(distance, elevation) }
+            combine(distanceFlow, elevationFlow) { (distance, elevation) -> Pair((collectDouble(distance)/100).roundToInt(), collectDouble(elevation).roundToInt()) }
             .distinctUntilChanged()
-            .collect { (distanceStream, elevationStream) ->
-                val distance = collectDouble(distanceStream)
-                val elevation = collectDouble(elevationStream)
+            .collect { (distance, elevation) ->
                 // Log.d(TAG, "Collected ${distance}, ${elevation}")
 
                 var view = glance.compose(context, DpSize.Unspecified) {
                     Box(modifier = GlanceModifier.fillMaxSize()) {
                         DoubleTypesVerticalScreen(
-                            "${DecimalFormat("0.0").format(distance)}",
-                            "${elevation.roundToInt()}",
+                            "${DecimalFormat("0.0").format(distance/10)}",
+                            "${elevation}",
                             R.drawable.ic_distance,
                             R.drawable.ic_ascent,
                             Color(ContextCompat.getColor(applicationContext, R.color.icongreen))

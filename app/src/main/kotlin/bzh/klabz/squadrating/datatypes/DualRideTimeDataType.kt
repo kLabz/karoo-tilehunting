@@ -33,6 +33,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 // TODO: move to separate extension
 @OptIn(ExperimentalGlanceRemoteViewsApi::class)
@@ -49,8 +50,7 @@ class DualRideTimeDataType(
         }
     }
 
-    private fun formatTimeFromSeconds(seconds: Double): String {
-        val totalMinutes = (seconds / 60).toInt()
+    private fun formatTimeFromMinutes(totalMinutes: Int): String {
         val hours = totalMinutes / 60
         val minutes = totalMinutes % 60
         return "${hours}:${minutes.toString().padStart(2, '0')}"
@@ -69,18 +69,18 @@ class DualRideTimeDataType(
             val totalFlow = karooSystem.streamDataFlow(DataType.Type.ELAPSED_TIME)
             val pausedFlow = karooSystem.streamDataFlow(DataType.Type.PAUSED_TIME)
 
-            combine(totalFlow, pausedFlow) { (total, paused) -> Pair(total, paused) }
+            combine(totalFlow, pausedFlow) { (total, paused) ->
+                Pair((collectDouble(total) / 60000).roundToInt(), (collectDouble(paused) / 60000).roundToInt())
+            }
             .distinctUntilChanged()
-            .collect { (totalStream, pausedStream) ->
-                val total = collectDouble(totalStream)
-                val paused = collectDouble(pausedStream)
+            .collect { (total, paused) ->
                 // Log.d(TAG, "Collected ${total}, ${paused}")
 
                 var view = glance.compose(context, DpSize.Unspecified) {
                     Box(modifier = GlanceModifier.fillMaxSize()) {
                         DoubleTypesVerticalScreen(
-                            "${formatTimeFromSeconds(total/1000)}",
-                            "${formatTimeFromSeconds(paused/1000)}",
+                            "${formatTimeFromMinutes(total)}",
+                            "${formatTimeFromMinutes(paused)}",
                             R.drawable.time,
                             R.drawable.pause_circle,
                             Color(ContextCompat.getColor(applicationContext, R.color.icongreen))

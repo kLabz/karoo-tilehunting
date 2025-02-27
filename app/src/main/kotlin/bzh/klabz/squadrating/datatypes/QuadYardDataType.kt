@@ -33,6 +33,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.combine
 
 @OptIn(ExperimentalGlanceRemoteViewsApi::class)
@@ -54,24 +55,32 @@ class QuadYardDataType(
             val exploredSquadratsFlow = applicationContext.exploredSquadratsDataStore.data
 
             data class StreamData(
-                val exploredSquadrats:ExploredSquadrats,
-                val page:Int
+                val page:Int,
+                val yard:Int,
+                val yardinho:Int,
+                val previousYard:Int,
+                val previousYardinho:Int
             )
 
             combine(exploredSquadratsFlow, quadYardPageFlow) {
-                exploredSquadrats, pageFlow -> StreamData(exploredSquadrats, pageFlow)
+                exploredSquadrats, pageFlow -> StreamData(
+                    pageFlow,
+                    exploredSquadrats.yard,
+                    exploredSquadrats.yardinho,
+                    exploredSquadrats.previousYard,
+                    exploredSquadrats.previousYardinho
+                )
             }
-            .collect { (exploredSquadrats, pageFlow) ->
+            .distinctUntilChanged()
+            .collect { (page, yard, yardinho, previousYard, previousYardinho) ->
                 // Log.d(TAG, "collect dual yard/uber")
-                var view = when (pageFlow) {
-                    0 -> {
-                        val yard = exploredSquadrats.yard
-                        val yardinho = exploredSquadrats.yardinho
-                        glance.compose(applicationContext, DpSize.Unspecified) {
-                            val modifier = if (!config.preview) GlanceModifier.fillMaxSize().clickable(onClick = actionRunCallback<CyclePageAction>())
-                                else GlanceModifier.fillMaxSize()
+                var view = glance.compose(applicationContext, DpSize.Unspecified) {
+                    val modifier = if (!config.preview) GlanceModifier.fillMaxSize().clickable(onClick = actionRunCallback<CyclePageAction>())
+                        else GlanceModifier.fillMaxSize()
 
-                            Box(modifier = modifier) {
+                    Box(modifier = modifier) {
+                        when (page) {
+                            0 -> {
                                 DoubleTypesVerticalScreen(
                                     yard.toString(),
                                     yardinho.toString(),
@@ -79,28 +88,18 @@ class QuadYardDataType(
                                     R.drawable.yardinho
                                 )
                             }
-                        }
-                    }
-                    else -> {
-                        val yard = exploredSquadrats.yard - exploredSquadrats.previousYard
-                        val yardinho = exploredSquadrats.yardinho - exploredSquadrats.previousYardinho
-                        glance.compose(applicationContext, DpSize.Unspecified) {
-                            val modifier = if (!config.preview) GlanceModifier.fillMaxSize().clickable(onClick = actionRunCallback<CyclePageAction>())
-                                else GlanceModifier.fillMaxSize()
-
-                            Box(modifier = modifier) {
+                            else -> {
                                 DoubleTypesVerticalScreen(
-                                    "+${yard}",
-                                    "+${yardinho}",
+                                    "+${yard - previousYard}",
+                                    "+${yardinho - previousYardinho}",
                                     R.drawable.incr_yard,
                                     R.drawable.incr_yardinho
                                 )
                             }
                         }
                     }
-                }
-                view.remoteViews.layoutId
-                emitter.updateView(view.remoteViews)
+                }.remoteViews
+                emitter.updateView(view)
             }
         }
 

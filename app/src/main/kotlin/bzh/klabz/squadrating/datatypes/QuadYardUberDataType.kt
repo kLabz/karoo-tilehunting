@@ -36,7 +36,7 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalGlanceRemoteViewsApi::class)
 class QuadYardUberDataType(
@@ -57,24 +57,32 @@ class QuadYardUberDataType(
             val exploredSquadratsFlow = applicationContext.exploredSquadratsDataStore.data
 
             data class StreamData(
-                val exploredSquadrats:ExploredSquadrats,
-                val page:Int
+                val page:Int,
+                val ubersquadrat:Int,
+                val ubersquadratinho:Int,
+                val yard:Int,
+                val yardinho:Int
             )
 
             combine(exploredSquadratsFlow, quadYardUberPageFlow) {
-                exploredSquadrats, pageFlow -> StreamData(exploredSquadrats, pageFlow)
+                exploredSquadrats, pageFlow -> StreamData(
+                    pageFlow,
+                    exploredSquadrats.biggestUbersquadratSize,
+                    exploredSquadrats.biggestUbersquadratinhoSize,
+                    exploredSquadrats.yard,
+                    exploredSquadrats.yardinho
+                )
             }
-            .collect { (exploredSquadrats, pageFlow) ->
+            .distinctUntilChanged()
+            .collect { (page, ubersquadrat, ubersquadratinho, yard, yardinho) ->
                 // Log.d(TAG, "collect dual yard/uber")
-                var view = when (pageFlow) {
-                    0 -> {
-                        val yard = exploredSquadrats.yard
-                        val ubersquadrat = exploredSquadrats.biggestUbersquadratSize
-                        glance.compose(applicationContext, DpSize.Unspecified) {
-                            val modifier = if (!config.preview) GlanceModifier.fillMaxSize().clickable(onClick = actionRunCallback<CyclePageAction>())
-                                else GlanceModifier.fillMaxSize()
+                var view = glance.compose(applicationContext, DpSize.Unspecified) {
+                    val modifier = if (!config.preview) GlanceModifier.fillMaxSize().clickable(onClick = actionRunCallback<CyclePageAction>())
+                        else GlanceModifier.fillMaxSize()
 
-                            Box(modifier = modifier) {
+                    Box(modifier = modifier) {
+                        when (page) {
+                            0 -> {
                                 DoubleTypesVerticalScreen(
                                     yard.toString(),
                                     ubersquadrat.toString(),
@@ -82,16 +90,7 @@ class QuadYardUberDataType(
                                     R.drawable.ubersquadrat
                                 )
                             }
-                        }
-                    }
-                    else -> {
-                        val yardinho = exploredSquadrats.yardinho
-                        val ubersquadratinho = exploredSquadrats.biggestUbersquadratinhoSize
-                        glance.compose(applicationContext, DpSize.Unspecified) {
-                            val modifier = if (!config.preview) GlanceModifier.fillMaxSize().clickable(onClick = actionRunCallback<CyclePageAction>())
-                                else GlanceModifier.fillMaxSize()
-
-                            Box(modifier = modifier) {
+                            else -> {
                                 DoubleTypesVerticalScreen(
                                     yardinho.toString(),
                                     ubersquadratinho.toString(),
